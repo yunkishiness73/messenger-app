@@ -11,10 +11,10 @@ AuthController.prototype.verifyEmail = (req, res) => {
     return new AuthManager().verifyEmail(token, res)
                             .then(data => {
                                 if (data && data.ok === 1)
-                                    res.render('index', { code: 200, message: 'Your account have been activated.' });
+                                return res.render('index', { code: 200, message: 'Your account have been activated.' });
                             })
                             .catch(() => {
-                                res.render('index', { code: 401, message: 'Sorry. Your account have been failed to activate.' });
+                                return res.render('index', { code: 401, message: 'Sorry. Your account have been failed to activate.' });
                             });
 }
 

@@ -9,7 +9,7 @@ class AuthManager extends BaseManager {
             try {
                 let entity = AuthService.verifyToken(token);
 
-                return yield User.updateOne({ username: entity.username }, { isActive: true });
+                return yield User.updateOne({ username: entity.username }, { status: 'Enabled' });
             } catch(err) {
                 return Promise.reject(err.message);
             }

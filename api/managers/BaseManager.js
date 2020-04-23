@@ -3,8 +3,28 @@ const _ = require('lodash');
 const Validator = require('../helpers/ValidatorUtil');
 const EmailService = require('../services/EmailService');
 const AuthService = require('../services/AuthService');
+const DateUtil = require('../helpers/DateUtil');
 
 class BaseManager {
+
+    getById(id) {
+        const self = this;
+
+        return co(function* getById() {
+            const Model = self.getModel();
+
+            let entity = yield Model.findById(id, '-password');
+
+            if (entity) return entity;
+
+            return Promise.reject();
+        });
+    }
+
+    beforeSave(originalEntity) {
+        return Promise.resolve(originalEntity);
+    }
+
     save(originalEntity) {
         const self = this;
         let entity;
@@ -16,6 +36,8 @@ class BaseManager {
             const validateResults = Validator.validateWithSchema(originalEntity, schema);
 
             if (!validateResults) {
+                originalEntity = yield self.beforeSave(originalEntity);
+
                 entity = Model(originalEntity);
 
                 let savedEntity = yield entity.save();
