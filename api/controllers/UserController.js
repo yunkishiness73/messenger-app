@@ -49,6 +49,22 @@ UserController.prototype.getById = (req, res) => {
                           .catch(err => {
                             res.status(500).json({ error: err });
                           });
-} 
+}
+
+UserController.prototype.forgotPassword = (req, res) => {
+    let { username } = req.body;
+
+    if (!username) {
+        return res.status(400).json({ error: { message: 'Missing email' } });
+    }
+
+    return new UserManager().forgotPassword(username)
+                            .then(result => {
+                                return res.status(200).json({ data: result });
+                            })
+                            .catch(err => {
+                                res.status(500).json({ error: err });
+                            });
+}
 
 module.exports = UserController.prototype;

@@ -17,11 +17,21 @@ class EmailService {
     sendConfirmationEmail(options) {
         const url = `${Constants.BASE_URL + '/auth/confirmation/' + options.token}`;
         const mailOptions = {
-            from: 'kietnguyen7398@gmail.com',
+            from: process.env.EMAIL_USER_NAME,
             to: `${options.to}`,
             subject: '[MESSENGER-APP] Verify your account',
-            text: `<b>Email sent from Nguyen Kiet</b>`,
             html: `<b>Click this link to verify your account ${url} . This link will expire in next 5 minutes </b>`
+        }
+
+        this.sendEmail(mailOptions);
+    }
+
+    sendResetPassword(options) {
+        const mailOptions = {
+            from: process.env.EMAIL_USER_NAME,
+            to: `${options.to}`,
+            subject: '[MESSENGER-APP] Reset password',
+            html: `<b>Your new password is ${options.password}</b>`
         }
 
         this.sendEmail(mailOptions);

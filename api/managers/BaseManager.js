@@ -5,6 +5,7 @@ const EmailService = require('../services/EmailService');
 const AuthService = require('../services/AuthService');
 const DateUtil = require('../helpers/DateUtil');
 
+
 class BaseManager {
 
     getById(id) {
@@ -66,7 +67,7 @@ class BaseManager {
     generateTokenAndSendMail(entity) {
         return co(function* generateTokenAndSendMail() {
             let token = AuthService.generateToken(entity);
-            console.log('token');
+
             if (token) {
                 EmailService.sendConfirmationEmail({ to: entity.username, token });
             }

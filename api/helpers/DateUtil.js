@@ -1,6 +1,10 @@
 const moment = require('moment');
 
 class DateUtil {
+    getNow() {
+        return moment().toDate();
+    }
+
     formatDate(date, format, isUTC) {
         if (date === null || date === '') return '';
         if (isUTC) {

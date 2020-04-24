@@ -33,26 +33,53 @@ app.use(bodyParser.json());
 app.use('/api/users', userRoute);
 app.use('/api/auth', authRoute);
 
+const Conversation = require('./api/models/Conversation');
+const User = require('./api/models/User');
+
+// app.get('/', async function (req, res) {
+//     let user = await User.findById("5ea2e8ce4227d23070a115d8");
+//     console.log(user);
+//     // let conversation = new Conversation({
+//     //     type: 'single',
+//     //         members: [user]
+//     // });
+
+  
+//     let conversation = await Conversation.findById("5ea2e8ce4227d23070a115d8").limit(1);
+
+//     console.log(conversation);
+
+//     conversation.members.push("5ea2e8ce4227d23070a115d8");
+//     conversation.ahihi = "ihaha";
+
+//       conversation.save()
+//         .then(result => {
+//             return res.status(200).json({ data: result });
+//         })
+//         .catch(err => {
+//             return res.status(500).json({ error: err });
+//         })
 
 
-app.get('/', function (req, res) {
-    // let user = new User({
-    //     username: 'vyte@gmail.com',
-    //     password: 'Th@otran17021997',
-    //     firstName: 'Kiet',
-    //     lastName: 'Nguyen',
-    //     displayName: 'Kiet Nguyen'
-    // });
 
-    // user.save()
-    //     .then(result => {
-    //         return res.status(200).json({ data: doc });
-    //     })
-    //     .catch(err => {
-    //         return res.status(500).json({ error: err });
-    //     })
-    return res.render('index', { code: 401, message: 'success' });
-});
+    
+//     // let user = new User({
+//     //     username: 'vyte@gmail.com',
+//     //     password: 'Th@otran17021997',
+//     //     firstName: 'Kiet',
+//     //     lastName: 'Nguyen',
+//     //     displayName: 'Kiet Nguyen'
+//     // });
+
+//     // user.save()
+//     //     .then(result => {
+//     //         return res.status(200).json({ data: doc });
+//     //     })
+//     //     .catch(err => {
+//     //         return res.status(500).json({ error: err });
+//     //     })
+//     // return res.render('index', { code: 401, message: 'success' });
+// });
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
