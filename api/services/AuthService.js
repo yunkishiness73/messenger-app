@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 class AuthService {
-    generateToken(entity) {
+    generateToken(entity, expiresTime) {
         console.log(entity);
         let payload = {
             id: entity.id,
@@ -11,7 +11,7 @@ class AuthService {
             displayName: entity.displayName,
         }
 
-       return jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: 300 });
+       return jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: expiresTime || 300 });
     }
 
 

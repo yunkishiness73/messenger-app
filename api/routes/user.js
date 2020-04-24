@@ -1,14 +1,16 @@
+const passport = require('passport');
 const express = require('express');
 const router = express();
 
 const UserController = require('../controllers/UserController');
 
+const requireAuth = passport.authenticate('jwt', { session: false });
 
 router.post('/', UserController.create);
 
 router.post('/forgotPassword', UserController.forgotPassword);
 
-router.get('/:id', UserController.getById);
+router.get('/:id', requireAuth, UserController.getById);
 
 
 

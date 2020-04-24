@@ -1,4 +1,5 @@
 const AuthManager = require('../managers/AuthManager');
+const AuthService =  require('../services/AuthService');
 
 let AuthController = function AuthController() {};
 
@@ -16,6 +17,16 @@ AuthController.prototype.verifyEmail = (req, res) => {
                             .catch(() => {
                                 return res.render('index', { code: 401, message: 'Sorry. Your account have been failed to activate.' });
                             });
+}
+
+AuthController.prototype.login = (req, res, next) => {
+    let user = req.user;
+
+    if (user) {
+        const token = AuthService.generateToken(user, 3600);
+    
+        return res.status(200).json({ token });
+    }
 }
 
 module.exports = AuthController.prototype;

@@ -33,6 +33,11 @@ app.use(bodyParser.json());
 app.use('/api/users', userRoute);
 app.use('/api/auth', authRoute);
 
+
+const passport = require('passport');
+
+require('./config/passport');
+
 const Conversation = require('./api/models/Conversation');
 const User = require('./api/models/User');
 
