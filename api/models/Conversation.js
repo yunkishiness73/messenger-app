@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const User = require('./User');
 
 const ConversationSchema = new mongoose.Schema({
     title: {
@@ -12,7 +11,7 @@ const ConversationSchema = new mongoose.Schema({
         default: 'single',
         required: true
     },
-    members: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
+    members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     createdAt: {
         type: Date,
         default: Date.now
