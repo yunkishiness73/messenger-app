@@ -21,6 +21,17 @@ class FriendManager extends BaseManager {
             return savedEntity;
        });
    }
+
+   getIncommingFriendsRequest(currentUser) {
+        return co(function* sendFriendRequest() {
+            return yield FriendRequest.find({ receiverID: currentUser._id, status: 'Pending'}, '-isDeleted')
+                                      .populate({
+                                          path: 'receiverID',
+                                          select: 'username firstName lastName',
+                                      });
+        })
+   }
+
 }
 
 module.exports = FriendManager;

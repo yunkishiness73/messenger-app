@@ -10,7 +10,7 @@ router.get('/', requireAuth, FriendController.search);
 
 /* Routes for Friend Request */
 // router.get('/requests', requireAuth, FriendController.getById);
-// router.get('/requests/incomming', requireAuth, FriendController.create);
+router.get('/requests/incomming', requireAuth, FriendController.getIncommingFriendsRequest);
 router.post('/requests', requireAuth, FriendController.sendFriendRequest);
 // router.post('/requests/accept', requireAuth, FriendController.accept);
 // router.post('/requests/reject', requireAuth, FriendController.reject);

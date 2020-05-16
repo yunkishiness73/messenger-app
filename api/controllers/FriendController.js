@@ -25,10 +25,27 @@ FriendController.prototype.sendFriendRequest = (req, res) => {
                             });
 }
 
+FriendController.prototype.getIncommingFriendsRequest = (req, res) => {
+    return new FriendManager()
+                .getIncommingFriendsRequest(req.user)
+                .then(incommingRequests => {
+                    if (!incommingRequests) {
+                        return res.status(404).json({ message: 'Resource not found' });
+                    }
+
+                    return res.status(200).json({ data: incommingRequests });
+                })
+                .catch(err => {
+                    res.status(500).json({ error: err });
+                });      
+}
+
 FriendController.prototype.search = (req, res) => {
 
    
 }
+
+
 
 
 module.exports = FriendController.prototype;
