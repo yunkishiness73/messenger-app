@@ -3,20 +3,29 @@ const mongoose = require('mongoose');
 const MessageSchema = new mongoose.Schema({
     type: {
         type: String,
-        enum: ['Enabled', 'Locked', 'Disabled', 'Pending'],
-        default: 'Pending',
+        enum: ['Text', 'Image', 'File'],
+        default: 'Text',
         required: true
     },
-    message: {
-        type: String,
-        required: true
+    conversationID: { 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Conversation",
+        required: true 
     },
-    isActive: {
-        type: Boolean,
-        default: false
+    senderID: { 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true 
     },
-    lastLoggedDate: {
-        type: Date
+    attachment: {
+        fileName: {
+            type: String,
+            required: true
+        },
+        fileURL: {
+            type: String,
+            required: true
+        }
     },
     createdAt: {
         type: Date,

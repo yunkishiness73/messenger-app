@@ -81,7 +81,28 @@ FriendController.prototype.accept = (req, res) => {
 }
 
 FriendController.prototype.reject = (req, res) => {
-   
+    let { friendRequestID } = req.body;
+    let currentUser = req.user;
+
+    if (!friendRequestID) {
+        return res.status(400).json({ message: 'Missing friend request ID' });
+    }
+
+    return new FriendManager()
+               .getFriendRequestByID(friendRequestID)
+                .then(friendRequest => {
+                    if (!friendRequest.receiverID.equals(currentUser._id)) {
+                        return res.status(403).json({ message: 'Cannot accept friend request' });
+                    }
+ 
+                    return new FriendManager().rejectFriendRequest(friendRequestID);
+                })
+                .then(data => {
+                    return res.status(200).json({ data });
+                })
+                .catch(err => {
+                    return res.status(500).json({ error: err });
+                }); 
 }
 
 FriendController.prototype.cancel = (req, res) => {
@@ -89,8 +110,16 @@ FriendController.prototype.cancel = (req, res) => {
 }
 
 FriendController.prototype.search = (req, res) => {
-
-   
+    let currentUser = req.user;
+    
+    return new FriendManager()
+                .search({ userID: currentUser._id })
+                .then(friend => {
+                    return res.status(200).json({ data: friend });
+                })
+                .catch(err => {
+                    return res.status(500).json({ error: err });
+                })
 }
 
 

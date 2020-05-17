@@ -7,8 +7,8 @@ const ConversationSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['single', 'group'],
-        default: 'single',
+        enum: ['Single', 'Group'],
+        default: 'Single',
         required: true
     },
     members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
@@ -26,6 +26,6 @@ const ConversationSchema = new mongoose.Schema({
     }
 }, { versionKey: false });
 
-const Conversation = mongoose.model('Conversation', ConversationSchema);
+const Conversation = mongoose.model('Conversation', ConversationSchema, 'conversations');
 
 module.exports = Conversation;
