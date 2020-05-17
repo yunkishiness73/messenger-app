@@ -11,7 +11,7 @@ const userRoute = require('./api/routes/user');
 const authRoute = require('./api/routes/auth');
 const friendRoute = require('./api/routes/friend');;
 
-mongoose.connect(process.env.MONGO_LOCAL, { useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true }, (err) => {
+mongoose.connect(process.env.MONGO_LOCAL, { useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true, retryWrites: false }, (err) => {
     if (err)
         console.log('Mongo connected failed ' + err);
     else

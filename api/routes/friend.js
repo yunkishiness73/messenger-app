@@ -12,9 +12,9 @@ router.get('/', requireAuth, FriendController.search);
 router.get('/requests', requireAuth, FriendController.getFriendsRequest);
 router.get('/requests/incomming', requireAuth, FriendController.getIncommingFriendsRequest);
 router.post('/requests', requireAuth, FriendController.sendFriendRequest);
-// router.post('/requests/accept', requireAuth, FriendController.accept);
-// router.post('/requests/reject', requireAuth, FriendController.reject);
-// router.post('/requests/cancel', requireAuth, FriendController.cancel);
+router.post('/requests/accept', requireAuth, FriendController.accept);
+router.post('/requests/reject', requireAuth, FriendController.reject);
+router.post('/requests/cancel', requireAuth, FriendController.cancel);
 
 
 module.exports = router;

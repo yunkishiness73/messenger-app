@@ -57,6 +57,7 @@ FriendController.prototype.getFriendsRequest = (req, res) => {
 
 FriendController.prototype.accept = (req, res) => {
     let { friendRequestID } = req.body;
+    let currentUser = req.user;
 
     if (!friendRequestID) {
         return res.status(400).json({ message: 'Missing friend request ID' });
@@ -65,17 +66,25 @@ FriendController.prototype.accept = (req, res) => {
     return new FriendManager()
                .getFriendRequestByID(friendRequestID)
                 .then(friendRequest => {
-                    return new FriendManager().acceptFriendRequest(friendRequestID);
+                    if (!friendRequest.receiverID.equals(currentUser._id)) {
+                        return res.status(403).json({ message: 'Cannot accept friend request' });
+                    }
+ 
+                    return new FriendManager().acceptFriendRequest(friendRequest);
                 })
                 .then(data => {
-                    
+                    return res.status(200).json({ data });
                 })
                 .catch(err => {
-                    res.status(500).json({ error: err });
+                    return res.status(500).json({ error: err });
                 }); 
 }
 
 FriendController.prototype.reject = (req, res) => {
+   
+}
+
+FriendController.prototype.cancel = (req, res) => {
    
 }
 

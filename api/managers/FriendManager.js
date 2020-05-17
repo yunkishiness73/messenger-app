@@ -1,7 +1,7 @@
 const co = require('co');
 const FriendRequest = require('../models/FriendRequest');
+const Friend = require('../models/Friend');
 const BaseManager = require('./BaseManager');
-const mongoose = require('mongoose');
 
 class FriendManager extends BaseManager {
    sendFriendRequest(payload) {
@@ -55,19 +55,25 @@ class FriendManager extends BaseManager {
         })
     }
 
-    acceptFriendRequest(friendRequestID) {
+    acceptFriendRequest(friendRequest) {
         return co(function* getFriendsRequest() {
-            const session = yield mongoose.startSession();
-
-            session.startTransaction();
-
             try {
-                const opts = { session };
-                
-                let updatedEntity = yield FriendRequest.updateOne({ _id: friendRequestID }, { status: 'Accepted' }).session(session);
+                let updatedEntity = yield FriendRequest.updateOne({ _id: friendRequest._id }, { status: 'Accepted' });
 
-                console.log(updatedEntity);
+                if (!updatedEntity.ok) {
+                    return Promise.reject({ message: 'Update resource failed' });
+                }
 
+                let user = new Friend({ 
+                    userID: friendRequest.senderID,
+                    friendID: friendRequest.receiverID
+                });
+                let friend = new Friend({
+                    userID: friendRequest.receiverID,
+                    friendID: friendRequest.senderID,
+                });
+
+                return yield Promise.all([ friend.save(), user.save() ]);
 
             } catch(err) {
                 yield session.abortTransaction();
