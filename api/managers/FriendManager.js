@@ -116,19 +116,25 @@ class FriendManager extends BaseManager {
                     userID
                 };
 
-                let friend = yield Friend.find(criteria, '-isDeleted -isBlocked')
-                                        .populate([
-                                            {
-                                                path: 'userID',
-                                                select: 'username firstName lastName',
-                                            },
-                                            {
-                                                path: 'friendID',
-                                                select: 'username firstName lastName',
-                                            },
-                                        ]);
+                // let friend = yield Friend.find(criteria, '-isDeleted -isBlocked')
+                //                         .populate(
+                //                             {
+                //                                 path: 'friendID',
+                //                                 select: 'username firstName lastName displayName'
+                //                             }
+                //                         );
 
-                return friend;
+                // return friend;
+                return yield Friend.aggregate([
+                    { $match: { userID } },
+                    { $lookup: { from: 'users', localField: 'friendID', foreignField: '_id', as: 'friendID' } },
+                    { $unwind: { path: '$friendID' } },
+                    { $project: { 
+                        "isDeleted": 0, "isBlocked": 0, "friendID.status": 0, "friendID.password": 0,
+                        "friendID.isActive": 0, "friendID.isDeleted": 0, "friendID.createdAt": 0, "friendID.updatedAt": 0 
+                    } },
+                    { $sort: { 'friendID.displayName': 1 } }
+                ]);
             } catch(err) {
                 return Promise.reject(err);
             }

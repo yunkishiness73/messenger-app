@@ -18,6 +18,8 @@ mongoose.connect(process.env.MONGO_LOCAL, { useUnifiedTopology: true, useNewUrlP
         console.log('Mongo connected successfully');
 });
 
+mongoose.set('debug', true);
+
 
 const app = express();
 
