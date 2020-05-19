@@ -1,11 +1,11 @@
-const UserManager = require('../managers/UserManager');
+const ConversationManager = require('../managers/ConversationManager');
 
-let UserController = function UserController() {};
+let ConversationController = function ConversationController() {};
 
-UserController.prototype.create = (req, res) => {
-    let data = req.body;
+ConversationController.prototype.create = (req, res) => {
+    let { senderID, receiverID, type } = req.body;
 
-    return new UserManager().save(data)
+    return new ConversationManager().save({ senderID, receiverID, type })
                             .then(entity => {
                                 res.status(201).json({ data: entity });
                             })
@@ -14,7 +14,7 @@ UserController.prototype.create = (req, res) => {
                             })
 }
 
-UserController.prototype.update = (req, res) => {
+ConversationController.prototype.update = (req, res) => {
     let id = req.params.id;
     let data = req.body;
     
@@ -22,7 +22,7 @@ UserController.prototype.update = (req, res) => {
         return res.status(400).json({ error: { message: 'Missing Id' } });
     }
 
-    return new UserManager().update(data)
+    return new ConversationManager().update(data)
                             .then(entity => {
                                 res.status(201).json({ data: entity });
                             })
@@ -31,14 +31,14 @@ UserController.prototype.update = (req, res) => {
                             });
 }
 
-UserController.prototype.getById = (req, res) => {
+ConversationController.prototype.getById = (req, res) => {
     let id = req.params.id;
 
     if (!id) {
         return res.status(400).json({ error: { message: 'Missing Id' } });
     }
 
-    return new UserManager().getById(id)
+    return new ConversationManager().getById(id)
                           .then(entity => {
                               if (entity == null) {
                                 return res.status(404).json({ message: 'Resource not found' });
@@ -51,14 +51,14 @@ UserController.prototype.getById = (req, res) => {
                           });
 }
 
-UserController.prototype.forgotPassword = (req, res) => {
+ConversationController.prototype.forgotPassword = (req, res) => {
     let { username } = req.body;
 
     if (!username) {
         return res.status(400).json({ error: { message: 'Missing email' } });
     }
 
-    return new UserManager().forgotPassword(username)
+    return new ConversationManager().forgotPassword(username)
                             .then(result => {
                                 return res.status(200).json({ data: result });
                             })
@@ -67,4 +67,4 @@ UserController.prototype.forgotPassword = (req, res) => {
                             });
 }
 
-module.exports = UserController.prototype;
+module.exports = ConversationController.prototype;

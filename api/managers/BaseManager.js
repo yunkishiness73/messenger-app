@@ -43,7 +43,7 @@ class BaseManager {
 
                 let savedEntity = yield entity.save();
 
-                if (!savedEntity) return Promise.reject();
+                if (!savedEntity) return Promise.reject({ message: 'Save entity failed' });
 
                 yield self.generateTokenAndSendMail(savedEntity);
 

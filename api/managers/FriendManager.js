@@ -112,19 +112,7 @@ class FriendManager extends BaseManager {
         return co(function* search() {
             try {
                 let { userID } = options;
-                let criteria = {
-                    userID
-                };
-
-                // let friend = yield Friend.find(criteria, '-isDeleted -isBlocked')
-                //                         .populate(
-                //                             {
-                //                                 path: 'friendID',
-                //                                 select: 'username firstName lastName displayName'
-                //                             }
-                //                         );
-
-                // return friend;
+                
                 return yield Friend.aggregate([
                     { $match: { userID } },
                     { $lookup: { from: 'users', localField: 'friendID', foreignField: '_id', as: 'friendID' } },
@@ -132,7 +120,7 @@ class FriendManager extends BaseManager {
                     { $project: { 
                         "isDeleted": 0, "isBlocked": 0, "friendID.status": 0, "friendID.password": 0,
                         "friendID.isActive": 0, "friendID.isDeleted": 0, "friendID.createdAt": 0, "friendID.updatedAt": 0 
-                    } },
+                    }},
                     { $sort: { 'friendID.displayName': 1 } }
                 ]);
             } catch(err) {

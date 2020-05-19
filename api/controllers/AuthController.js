@@ -22,10 +22,18 @@ AuthController.prototype.verifyEmail = (req, res) => {
 AuthController.prototype.login = (req, res, next) => {
     let user = req.user;
 
+    const userInfo = {
+        _id: user._id,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        displayName: user.displayName
+    };
+
     if (user) {
         const token = AuthService.generateToken(user, 3600);
     
-        return res.status(200).json({ token });
+        return res.status(200).json({ token, userInfo });
     }
 }
 

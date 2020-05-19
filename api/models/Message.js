@@ -7,7 +7,7 @@ const MessageSchema = new mongoose.Schema({
         default: 'Text',
         required: true
     },
-    conversationID: { 
+    conversation: { 
         type: mongoose.Schema.Types.ObjectId,
         ref: "Conversation",
         required: true 

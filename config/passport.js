@@ -15,7 +15,7 @@ const localOptions = {
 };
 
 passport.use(new LocalStrategy(localOptions, function(username, password, done){
-    User.findOne({ username }, function(err, user) {
+    User.findOne({ username, status: 'Enabled' }, function(err, user) {
         if (err) return done(err, false);
 
         if (!user) return done(null, false, { message: 'User is not existed'});
