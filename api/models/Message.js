@@ -23,10 +23,16 @@ const MessageSchema = new mongoose.Schema({
     },
     attachment: {
         fileName: {
-            type: String,
+            type: String
         },
         fileURL: {
-            type: String,
+            type: String
+        },
+        fileSize: {
+            type: String
+        },
+        fileType: {
+            type: String
         }
     },
     createdAt: {

@@ -6,13 +6,14 @@ class MessageManager extends BaseManager {
     save(payload) {
         return co(function* save() {
             try {
-                let { conversationID, type, senderID, message } = payload;
+                let { conversationID, type, senderID, message, attachment } = payload;
 
                 let messageEntity = new Message({
                     conversation: conversationID,
                     type,
                     senderID,
-                    message
+                    message,
+                    attachment
                 });
     
                 let savedEntity = messageEntity.save();
@@ -30,7 +31,11 @@ class MessageManager extends BaseManager {
 
     getMessagesByConversationID(conversationID, options) {
         return co(function* getMessageByConversationID() {
-            return yield Message.find({ conversation: conversationID }, '-isDeleted');
+            return yield Message.find({ conversation: conversationID }, '-isDeleted')
+                                .populate({
+                                    path: 'senderID',
+                                    select: '-isDeleted -isBlocked -status -password -isActive'
+                                });
         });
     }
     

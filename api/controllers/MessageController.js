@@ -4,12 +4,23 @@ const ConversationManager = require('../managers/ConversationManager');
 let MessageController = function MessageController() {};
 
 MessageController.prototype.create = (req, res) => {
+    let attachment;
     let currentUser = req.user;
     let { receiverID, conversationType, message, conversationID, messageType } = req.body;
+    let file = req.file;
+
+    if (file) {
+        attachment = {
+            fileName: file.filename,
+            fileURL: file.path.replace(/\\/g, "/"),
+            fileSize: file.size,
+            fileType: file.mimetype
+        }
+    }
 
     if (!conversationID) {
         return new ConversationManager()
-                   .save({ receiverID, type: conversationType, message, conversationID })
+                   .save({ receiverID, type: conversationType, message, conversationID, attachment })
                    .then(conversationEntity => {
                         let payload = {
                             conversationID: conversationEntity._id,
@@ -43,7 +54,7 @@ MessageController.prototype.create = (req, res) => {
                             } });
                        }
 
-                        return new MessageManager().save({ conversationID, type: messageType, senderID: currentUser._id, message })
+                        return new MessageManager().save({ conversationID, type: messageType, senderID: currentUser._id, message, attachment })
                     })
                     .then(messageEntity => {
                         res.status(201).json({ data: messageEntity });
@@ -51,9 +62,6 @@ MessageController.prototype.create = (req, res) => {
                     .catch(err => {
                         res.status(500).json({ error: err });
                     });
-    
-
-   
 }
 
 module.exports = MessageController.prototype;
