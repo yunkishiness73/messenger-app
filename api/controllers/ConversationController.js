@@ -1,4 +1,5 @@
 const ConversationManager = require('../managers/ConversationManager');
+const MessageManager = require('../managers/MessageManager');
 
 let ConversationController = function ConversationController() {};
 
@@ -51,20 +52,43 @@ ConversationController.prototype.getById = (req, res) => {
                           });
 }
 
-ConversationController.prototype.forgotPassword = (req, res) => {
-    let { username } = req.body;
+ConversationController.prototype.getMessages = (req, res) => {
+    let conversationID = req.params.id;
+    let currentUser = req.user;
 
-    if (!username) {
-        return res.status(400).json({ error: { message: 'Missing email' } });
+    console.log(conversationID);
+
+    if (!conversationID) {
+        return res.status(400).json({
+            error: {
+                message: 'Missing Conversation ID'
+            }
+        })
     }
 
-    return new ConversationManager().forgotPassword(username)
-                            .then(result => {
-                                return res.status(200).json({ data: result });
-                            })
-                            .catch(err => {
-                                res.status(500).json({ error: err });
-                            });
+    return new ConversationManager()
+                   .getById(conversationID)
+                   .then(conversationEntity => {
+                       if (!conversationEntity) {
+                           return res.status(404).json({ error: {
+                               message: 'Conversation not found'
+                           } });
+                       }
+
+                       if (!conversationEntity.members.includes(currentUser._id)) {
+                            return res.status(403).json({ error: {
+                                message: 'Not allowed to get message from this conversation'
+                            } });
+                       }
+
+                        return new MessageManager().getMessagesByConversationID(conversationID);
+                    })
+                    .then(messages => {
+                        return res.status(200).json({ data: messages });
+                    })
+                    .catch(err => {
+                        res.status(500).json({ error: err });
+                    });
 }
 
 module.exports = ConversationController.prototype;

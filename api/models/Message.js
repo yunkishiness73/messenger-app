@@ -7,6 +7,10 @@ const MessageSchema = new mongoose.Schema({
         default: 'Text',
         required: true
     },
+    message: {
+        type: String,
+        required: true
+    },
     conversation: { 
         type: mongoose.Schema.Types.ObjectId,
         ref: "Conversation",
@@ -20,11 +24,9 @@ const MessageSchema = new mongoose.Schema({
     attachment: {
         fileName: {
             type: String,
-            required: true
         },
         fileURL: {
             type: String,
-            required: true
         }
     },
     createdAt: {

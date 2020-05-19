@@ -3,6 +3,11 @@ const Conversation = require('../models/Conversation');
 const BaseManager = require('./BaseManager');
 
 class ConversationManager extends BaseManager {
+
+    getModel() {
+        return Conversation;
+    }
+
     save(payload) {
         return co(function* save() {
             try {

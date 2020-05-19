@@ -8,6 +8,8 @@ const requireAuth = passport.authenticate('jwt', { session: false });
 
 /* Routes for Conversation Request */
 router.post('/', requireAuth, ConversationController.create);
+router.get('/:id', requireAuth, ConversationController.getById);
+router.get('/:id/messages', requireAuth, ConversationController.getMessages);
 
 
 module.exports = router;

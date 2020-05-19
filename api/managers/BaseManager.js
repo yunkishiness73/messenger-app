@@ -14,11 +14,7 @@ class BaseManager {
         return co(function* getById() {
             const Model = self.getModel();
 
-            let entity = yield Model.findById(id, '-password');
-
-            if (entity) return entity;
-
-            return Promise.reject();
+            return yield Model.findById(id);
         });
     }
 

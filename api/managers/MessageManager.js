@@ -6,14 +6,16 @@ class MessageManager extends BaseManager {
     save(payload) {
         return co(function* save() {
             try {
-                let { senderID, receiverID, type } = payload;
+                let { conversationID, type, senderID, message } = payload;
 
-                let conversation = new Message({
-                    members: [senderID, receiverID],
-                    type
+                let messageEntity = new Message({
+                    conversation: conversationID,
+                    type,
+                    senderID,
+                    message
                 });
     
-                let savedEntity = conversation.save();
+                let savedEntity = messageEntity.save();
 
                 if (!savedEntity) {
                     return Promise.reject({ message: 'Save entity failed' });
@@ -23,6 +25,12 @@ class MessageManager extends BaseManager {
             } catch(err) {
                 return Promise.reject(err);
             }
+        });
+    }
+
+    getMessagesByConversationID(conversationID, options) {
+        return co(function* getMessageByConversationID() {
+            return yield Message.find({ conversation: conversationID }, '-isDeleted');
         });
     }
     

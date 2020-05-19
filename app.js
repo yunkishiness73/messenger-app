@@ -11,6 +11,7 @@ const userRoute = require('./api/routes/user');
 const authRoute = require('./api/routes/auth');
 const friendRoute = require('./api/routes/friend');
 const conversationRoute = require('./api/routes/conversation');
+const messageRoute = require('./api/routes/message');
 
 
 mongoose.connect(process.env.MONGO_LOCAL, { useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true, retryWrites: false }, (err) => {
@@ -39,6 +40,7 @@ app.use('/api/users', userRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/friends', friendRoute);
 app.use('/api/conversations', conversationRoute);
+app.use('/api/messages', messageRoute);
 
 
 const passport = require('passport');

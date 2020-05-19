@@ -21,6 +21,16 @@ class UserManager extends BaseManager {
         return Promise.resolve(originalEntity);
     }
 
+    getById(id) {
+        const self = this;
+
+        return co(function* getById() {
+            const Model = self.getModel();
+
+            return yield Model.findById(id, '-password');
+        });
+    }
+
     generatePassword() {
         let passwordArray = [];
 
