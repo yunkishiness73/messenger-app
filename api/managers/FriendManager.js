@@ -1,6 +1,7 @@
 const co = require('co');
 const FriendRequest = require('../models/FriendRequest');
 const Friend = require('../models/Friend');
+const User = require('../models/User');
 const BaseManager = require('./BaseManager');
 
 class FriendManager extends BaseManager {
@@ -111,8 +112,20 @@ class FriendManager extends BaseManager {
     search(options) {
         return co(function* search() {
             try {
-                let { userID } = options;
+                let { userID, q, searchType } = options;
                 
+                if (searchType) {
+                    return yield User.aggregate([
+                        { $match: { 
+                            $or: [ 
+                                { username: new RegExp(q, "gmi") },
+                                { displayName: new RegExp(q, "gmi") }
+                            ]
+                        }},
+                        { $project: { username: 1, firstName: 1, lastName: 1, displayName: 1 } }
+                    ]);
+                }
+
                 return yield Friend.aggregate([
                     { $match: { userID } },
                     { $lookup: { from: 'users', localField: 'friendID', foreignField: '_id', as: 'friendID' } },
