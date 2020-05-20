@@ -20,7 +20,7 @@ MessageController.prototype.create = (req, res) => {
 
     if (!conversationID) {
         return new ConversationManager()
-                   .save({ receiverID, type: conversationType, message, conversationID, attachment })
+                   .save({ senderID: currentUser._id,receiverID, type: conversationType, message, attachment })
                    .then(conversationEntity => {
                         let payload = {
                             conversationID: conversationEntity._id,

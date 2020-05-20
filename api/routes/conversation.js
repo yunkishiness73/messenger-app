@@ -10,6 +10,7 @@ const requireAuth = passport.authenticate('jwt', { session: false });
 router.post('/', requireAuth, ConversationController.create);
 router.get('/:id', requireAuth, ConversationController.getById);
 router.get('/:id/messages', requireAuth, ConversationController.getMessages);
+router.delete('/:id', requireAuth, ConversationController.delete);
 
 
 module.exports = router;

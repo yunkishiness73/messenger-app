@@ -69,6 +69,21 @@ class BaseManager {
             }
         });
     }
+
+    delete(id, options) {
+        const self = this;
+
+        return co(function* update() {
+            try {
+                const Model = self.getModel();
+            
+                return yield Model.deleteOne({ _id: id });
+            } catch(err) {
+                console.log(err);
+                return Promise.reject(err);
+            }
+        });
+    }
 }
 
 module.exports = BaseManager;
