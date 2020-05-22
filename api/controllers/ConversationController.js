@@ -4,9 +4,10 @@ const MessageManager = require('../managers/MessageManager');
 let ConversationController = function ConversationController() { };
 
 ConversationController.prototype.create = (req, res) => {
-    let { senderID, receiverID, type } = req.body;
+    let { senderID, receiverID, type, title, members } = req.body;
+    let currentUser = req.user;
 
-    return new ConversationManager().save({ senderID, receiverID, type })
+    return new ConversationManager().save({ senderID: currentUser._id, receiverID, type, title, members })
         .then(entity => {
             res.status(201).json({ data: entity });
         })

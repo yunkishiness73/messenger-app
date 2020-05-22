@@ -1,6 +1,7 @@
 const co = require('co');
 const Conversation = require('../models/Conversation');
 const BaseManager = require('./BaseManager');
+const Constants = require('../constants/Constants');
 
 class ConversationManager extends BaseManager {
 
@@ -9,16 +10,54 @@ class ConversationManager extends BaseManager {
     }
 
     save(payload) {
-        return co(function* save() {
-            try {
-                let { senderID, receiverID, type } = payload;
+        const self = this;
 
-                let conversation = new Conversation({
-                    members: [senderID, receiverID],
-                    type
-                });
-    
-                let savedEntity = conversation.save();
+        return co(function* save() {
+            let Model = self.getModel();
+
+            try {
+                let { senderID, receiverID, type, title, members } = payload;
+                let conversation;
+                /*
+                * Populate whether conversation already existed
+                * If not, create new one
+                * Othewise, send error message to client
+                */
+               console.log(members);
+               switch(type) {
+                   case Constants.CONVERSATION_TYPE.Group:
+                        conversation = new Conversation({
+                            members: [senderID, ...members],
+                            type, 
+                            title
+                        });
+
+                        break;
+                    default:
+                        let entity = yield Model.find({ 
+                                                        members: { 
+                                                            $all: [senderID, receiverID]
+                                                        }
+                                                      })
+                                                        .populate({
+                                                            path: 'members',
+                                                            select: 'username displayName firstName lastName'
+                                                        });
+
+                            if (Array.isArray(entity) && entity.length === 0) {
+                                conversation = new Conversation({
+                                    members: [senderID, receiverID],
+                                    type
+                                });
+                            } else {
+                                return Promise.reject({
+                                    message: 'Conversation already existed'
+                                });
+                            }
+                        break;
+               }
+
+                let savedEntity = yield conversation.save();
 
                 if (!savedEntity) {
                     return Promise.reject({ message: 'Save entity failed' });

@@ -15,7 +15,7 @@ class MessageManager extends BaseManager {
                     type,
                     senderID,
                     message,
-                    attachment
+                    attachment,
                 });
     
                 let savedEntity = yield messageEntity.save();
