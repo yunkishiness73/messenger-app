@@ -1,4 +1,5 @@
 const UserManager = require('../managers/UserManager');
+const ConversationManager = require('../managers/ConversationManager');
 
 let UserController = function UserController() {};
 
@@ -66,5 +67,21 @@ UserController.prototype.forgotPassword = (req, res) => {
                                 res.status(500).json({ error: err });
                             });
 }
+
+UserController.prototype.getConversations = (req, res) => {
+   let currentUser = req.user;
+
+   return new ConversationManager()
+                .getUserConversations({ userID: currentUser._id })
+                .then(conversations => {
+                    return res.status(200).json({ data: conversations });
+                })
+                .catch(err => {
+                    return res.status(500).json({ error: err });
+                });
+}
+
+
+
 
 module.exports = UserController.prototype;

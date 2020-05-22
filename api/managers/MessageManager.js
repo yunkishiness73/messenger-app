@@ -1,6 +1,8 @@
 const co = require('co');
 const Message = require('../models/Message');
 const BaseManager = require('./BaseManager');
+const Conversation = require('../models/Conversation');
+const DateUtil = require('../helpers/DateUtil');
 
 class MessageManager extends BaseManager {
     save(payload) {
@@ -16,10 +18,16 @@ class MessageManager extends BaseManager {
                     attachment
                 });
     
-                let savedEntity = messageEntity.save();
+                let savedEntity = yield messageEntity.save();
 
                 if (!savedEntity) {
                     return Promise.reject({ message: 'Save entity failed' });
+                }
+
+                let updatedConversation = yield Conversation.updateOne({ _id: conversationID }, { updatedAt: DateUtil.getNow(), lastMessage: savedEntity._id });
+
+                if (!updatedConversation.nModified) {
+                    return Promise.reject({ message: 'Update conversation failed' });
                 }
 
                 return savedEntity;

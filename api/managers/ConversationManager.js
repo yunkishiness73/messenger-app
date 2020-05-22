@@ -30,6 +30,48 @@ class ConversationManager extends BaseManager {
             }
         });
     }
+
+    getUserConversations(payload) {
+        const self = this;
+
+        return co(function* search() {
+            let { userID } = payload;
+            let Model = self.getModel();
+
+            // return yield Model.find({ 
+            //                         members: { 
+            //                             $all: ["5ec344ebcfd7e138f8fc40db", "5ec344ebcfd7e138f8fc40db"]
+            //                         }
+            //                     })
+            //                     .populate({
+            //                         path: 'members',
+            //                         select: 'username displayName firstName lastName'
+            //                     });
+            return yield Model.find({ 
+                                    members: { 
+                                        $all: [userID]
+                                    }
+                                },
+                                '-isDeleted',
+                                {
+                                    sort: { 'updatedAt': -1  }
+                                })
+                                .populate([
+                                    {
+                                        path: 'members',
+                                        select: 'username displayName firstName lastName'
+                                    },
+                                    {
+                                        path: 'lastMessage',
+                                        select: '-isDeleted',
+                                        populate: {
+                                            path: 'senderID',
+                                            select: 'username displayName firstName lastName'
+                                        }
+                                    }
+                                ]);
+        });
+    }
     
     search(options) {
         return co(function* search() {
