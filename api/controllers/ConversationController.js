@@ -18,15 +18,34 @@ ConversationController.prototype.create = (req, res) => {
 
 ConversationController.prototype.update = (req, res) => {
     let id = req.params.id;
-    let data = req.body;
+    let { title } = req.body;
 
     if (!id) {
         return res.status(400).json({ error: { message: 'Missing Id' } });
     }
 
-    return new ConversationManager().update(data)
+    return new ConversationManager().getById(id)
         .then(entity => {
-            res.status(201).json({ data: entity });
+            if (entity == null) {
+                return res.status(404).json({
+                    error: {
+                        message: 'Conversation not found'
+                    }
+                });
+            }
+
+            if (!entity.members.includes(currentUser._id)) {
+                return res.status(403).json({
+                    error: {
+                        message: 'Not have permission to perform action on this conversation'
+                    }
+                });
+            }
+
+            return ConversationManager().update({ conversation: entity, title });
+        })
+        .then(result => {
+            return res.status(200).json({ })
         })
         .catch(err => {
             res.status(500).json({ error: err });
@@ -53,11 +72,47 @@ ConversationController.prototype.getById = (req, res) => {
         });
 }
 
+ConversationController.prototype.addMembers = (req, res) => {
+    let { members } = req.body;
+    let conversationID = req.params['id'];
+    let currentUser = req.user;
+
+    if (!conversationID) {
+        return res.status(400).json({ error: { message: 'Missing Id' } });
+    }
+
+    return new ConversationManager().getById(conversationID)
+            .then(entity => {
+                if (entity == null) {
+                    return res.status(404).json({
+                        error: {
+                            message: 'Conversation not found'
+                        }
+                    });
+                }
+
+                if (!entity.members.includes(currentUser._id)) {
+                    return res.status(403).json({
+                        error: {
+                            message: 'Not have permission to perform action on this conversation'
+                        }
+                    });
+                }
+
+               return new ConversationManager().update({ members, conversation: entity });
+            })
+            .then(result => {
+                return res.status(200).json({ data: result });
+            })
+            .catch(err => {
+            return res.status(500).json({ error: err });
+            });
+    
+}
+
 ConversationController.prototype.delete = (req, res) => {
     let conversationID = req.params.id;
     let currentUser = req.user;
-
-    console.log(conversationID);
 
     if (!conversationID) {
         return res.status(400).json({ error: { message: 'Missing Id' } });

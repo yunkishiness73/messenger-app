@@ -23,7 +23,6 @@ class ConversationManager extends BaseManager {
                 * If not, create new one
                 * Othewise, send error message to client
                 */
-               console.log(members);
                switch(type) {
                    case Constants.CONVERSATION_TYPE.Group:
                         conversation = new Conversation({
@@ -66,6 +65,19 @@ class ConversationManager extends BaseManager {
                 return savedEntity;
             } catch(err) {
                 return Promise.reject(err);
+            }
+        });
+    }
+
+    update(payload) {
+        return co(function* update() {
+            let { title, members, conversation } = payload;
+
+            if (conversation.type === Constants.CONVERSATION_TYPE.Group) {
+                conversation.members.push(...members);
+                conversation.title = title || conversation.title;
+
+                return yield conversation.save();
             }
         });
     }

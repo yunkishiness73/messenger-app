@@ -31,7 +31,7 @@ AuthController.prototype.login = (req, res, next) => {
     };
 
     if (user) {
-        const token = AuthService.generateToken(user, 3600);
+        const token = AuthService.generateToken(user, 7200);
     
         return res.status(200).json({ token, userInfo });
     }
