@@ -39,11 +39,25 @@ class MessageManager extends BaseManager {
 
     getMessagesByConversationID(conversationID, options) {
         return co(function* getMessageByConversationID() {
-            return yield Message.find({ conversation: conversationID }, '-isDeleted')
+            const { pageIndex, pageSize } = options;
+
+            const offset = (pageIndex - 1) * pageSize;
+
+            let messages = yield Message.find({ conversation: conversationID }, '-isDeleted', { 
+                                    sort: {
+                                        createdAt: -1
+                                    },
+                                    limit: pageSize,
+                                    skip: offset
+                                })
                                 .populate({
                                     path: 'senderID',
                                     select: '-isDeleted -isBlocked -status -password -isActive'
                                 });
+
+            let reversedMessage = messages.reverse();
+                                
+            return reversedMessage;
         });
     }
     

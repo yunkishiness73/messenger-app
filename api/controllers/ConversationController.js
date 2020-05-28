@@ -1,5 +1,6 @@
 const ConversationManager = require('../managers/ConversationManager');
 const MessageManager = require('../managers/MessageManager');
+const Constants = require('../constants/Constants');
 
 let ConversationController = function ConversationController() { };
 
@@ -16,9 +17,10 @@ ConversationController.prototype.create = (req, res) => {
         })
 }
 
-ConversationController.prototype.update = (req, res) => {
+ConversationController.prototype.update = (req, res, next) => {
     let id = req.params.id;
     let { title } = req.body;
+    let currentUser = req.user;
 
     if (!id) {
         return res.status(400).json({ error: { message: 'Missing Id' } });
@@ -26,6 +28,7 @@ ConversationController.prototype.update = (req, res) => {
 
     return new ConversationManager().getById(id)
         .then(entity => {
+            console.log(entity)
             if (entity == null) {
                 return res.status(404).json({
                     error: {
@@ -42,13 +45,13 @@ ConversationController.prototype.update = (req, res) => {
                 });
             }
 
-            return ConversationManager().update({ conversation: entity, title });
+            return new ConversationManager().update({ conversation: entity, title });
         })
         .then(result => {
-            return res.status(200).json({ })
+            return res.status(200).json({ data: result });
         })
         .catch(err => {
-            res.status(500).json({ error: err });
+            next(err);
         });
 }
 
@@ -151,9 +154,10 @@ ConversationController.prototype.delete = (req, res) => {
             });
 }
 
-ConversationController.prototype.getMessages = (req, res) => {
+ConversationController.prototype.getMessages = (req, res, next) => {
     let conversationID = req.params.id;
     let currentUser = req.user;
+    let { pageIndex, pageSize } = req.query;
 
     if (!conversationID) {
         return res.status(400).json({
@@ -182,12 +186,13 @@ ConversationController.prototype.getMessages = (req, res) => {
                 });
             }
 
-            return new MessageManager().getMessagesByConversationID(conversationID);
+            return new MessageManager().getMessagesByConversationID(conversationID, { pageIndex: parseInt(pageIndex) || 1, pageSize: parseInt(pageSize) || parseInt(Constants.pageSize) });
         })
         .then(messages => {
             return res.status(200).json({ data: messages });
         })
         .catch(err => {
+            next(err);
             res.status(500).json({ error: err });
         });
 }

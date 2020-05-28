@@ -4,5 +4,8 @@ module.exports = {
     CONVERSATION_TYPE: {
         Group: 'Group',
         Single: 'Single'
-    }
+    },
+
+    pageSize: 30,
+
 }

@@ -74,11 +74,17 @@ class ConversationManager extends BaseManager {
             let { title, members, conversation } = payload;
 
             if (conversation.type === Constants.CONVERSATION_TYPE.Group) {
-                conversation.members.push(...members);
-                conversation.title = title || conversation.title;
-
+                if (members) {
+                    conversation.members.push(...members);
+                } else if (title) {
+                    conversation.title = title || conversation.title;
+                }
+             
                 return yield conversation.save();
             }
+        })
+        .catch(err => {
+            return Promise.reject(err);
         });
     }
 
