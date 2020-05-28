@@ -79,7 +79,6 @@ class BaseManager {
             
                 return yield Model.deleteOne({ _id: id });
             } catch(err) {
-                console.log(err);
                 return Promise.reject(err);
             }
         });

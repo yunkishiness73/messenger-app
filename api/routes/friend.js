@@ -7,6 +7,7 @@ const FriendController = require('../controllers/FriendController');
 const requireAuth = passport.authenticate('jwt', { session: false });
 
 router.get('/', requireAuth, FriendController.search);
+router.delete('/:id/unfriend', requireAuth, FriendController.unfriend);
 
 /* Routes for Friend Request */
 router.get('/requests', requireAuth, FriendController.getFriendsRequest);

@@ -5,6 +5,11 @@ const User = require('../models/User');
 const BaseManager = require('./BaseManager');
 
 class FriendManager extends BaseManager {
+
+    getModel() {
+        return Friend;
+    }
+
     sendFriendRequest(payload) {
         return co(function* sendFriendRequest() {
             const { senderID, receiverID } = payload;
@@ -141,6 +146,25 @@ class FriendManager extends BaseManager {
             }
             
         }); 
+    }
+
+    unfriend(payload) {
+        const self = this;
+
+        return co(function* unfriend() {
+            const Model = self.getModel();
+            const { userID, friendID } = payload;
+          
+            return yield Model.deleteMany({
+                $or: [
+                    { userID, friendID },
+                    { userID: friendID, friendID: userID }
+                ]
+            });
+        })
+        .catch(err => {
+            Promise.reject({ err });
+        });
     }
 
 }

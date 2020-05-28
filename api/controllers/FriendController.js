@@ -109,6 +109,32 @@ FriendController.prototype.cancel = (req, res) => {
    
 }
 
+FriendController.prototype.unfriend = (req, res, next) => {
+    let currentUser = req.user;
+    let friendID = req.params.id;
+
+    if (!friendID) {
+        return res.status(400).json({ message: 'Missing friend ID' });
+    }
+
+    return new FriendManager()
+                .unfriend({ friendID, userID: currentUser._id })
+                .then(result => {
+                    if (result.deletedCount) {
+                        return res.status(200).json({ 
+                            message: 'Unfriend successfully' 
+                        });
+                    }
+
+                    return res.status(500).json({ error: {
+                        message: 'Unfriend failed'
+                    }});
+                })
+                .catch(err => {
+                    return res.status(500).json({ error: err });
+                }); 
+}
+
 FriendController.prototype.search = (req, res) => {
     let currentUser = req.user;
     
