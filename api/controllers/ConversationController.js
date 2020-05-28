@@ -157,7 +157,8 @@ ConversationController.prototype.delete = (req, res) => {
 ConversationController.prototype.getMessages = (req, res, next) => {
     let conversationID = req.params.id;
     let currentUser = req.user;
-    let { pageIndex, pageSize } = req.query;
+    let pageIndex = parseInt(req.query['pageIndex']) || 1;
+    let pageSize = parseInt(req.query['pageSize']) || parseInt(Constants.pageSize);
 
     if (!conversationID) {
         return res.status(400).json({
@@ -186,7 +187,7 @@ ConversationController.prototype.getMessages = (req, res, next) => {
                 });
             }
 
-            return new MessageManager().getMessagesByConversationID(conversationID, { pageIndex: parseInt(pageIndex) || 1, pageSize: parseInt(pageSize) || parseInt(Constants.pageSize) });
+            return new MessageManager().getMessagesByConversationID(conversationID, { pageIndex, pageSize });
         })
         .then(messages => {
             return res.status(200).json({ data: messages });
