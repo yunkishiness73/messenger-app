@@ -3,8 +3,17 @@ const ConversationManager = require('../managers/ConversationManager');
 
 let UserController = function UserController() {};
 
-UserController.prototype.create = (req, res) => {
+UserController.prototype.create = (req, res, next) => {
     let data = req.body;
+    let file = req.file;
+    let photo;
+
+    if (file && file.mimetype.split("/")[0] !== "image") {
+        return res.status(400).json({ error: { message: 'Photo field must be image type (jpeg,png,jpg,...)' } });
+    } else {
+        photo = file.path.replace(/\\/g, "/");
+        data['photo'] = photo;
+    }
 
     return new UserManager().save(data)
                             .then(entity => {
@@ -15,20 +24,50 @@ UserController.prototype.create = (req, res) => {
                             })
 }
 
-UserController.prototype.update = (req, res) => {
+UserController.prototype.update = (req, res, next) => {
     let id = req.params.id;
     let data = req.body;
-    
+    let file = req.file;
+    let photo;
+
+    if (file && file.mimetype.split("/")[0] !== "image") {
+        return res.status(400).json({ error: { message: 'Photo field must be image type (jpeg,png,jpg,...)' } });
+    } else {
+        photo = file.path.replace(/\\/g, "/");
+        data['photo'] = photo;
+    }
+   
     if (!id) {
         return res.status(400).json({ error: { message: 'Missing Id' } });
     }
 
-    return new UserManager().update(data)
+    return new UserManager().getById(id)
+                            .then(user => {
+                                if (!user) {
+                                    return res.status(404).json({
+                                        error: {
+                                            message: 'User not found'
+                                        }
+                                    });
+                                }
+
+                                return new UserManager().update({ originalEntity: user, doc: data });
+                            })
                             .then(entity => {
-                                res.status(201).json({ data: entity });
+                                if (entity.ok === 1) {
+                                    return res.status(201).json({ 
+                                        message: 'Update successfully' 
+                                    });
+                                }
+                               
+                                return res.status(500).json({ 
+                                    error: {
+                                        message: 'Update failed'
+                                    }
+                                 });
                             })
                             .catch(err => {
-                                res.status(500).json({ error: err });
+                                next(err);
                             });
 }
 

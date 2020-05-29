@@ -1,5 +1,7 @@
 const AuthManager = require('../managers/AuthManager');
+const UserManager = require('../managers/UserManager');
 const AuthService =  require('../services/AuthService');
+const DateUtil = require('../helpers/DateUtil');
 
 let AuthController = function AuthController() {};
 
@@ -31,9 +33,32 @@ AuthController.prototype.login = (req, res, next) => {
     };
 
     if (user) {
-        const token = AuthService.generateToken(user, 7200);
+        let criteria = {
+            _id: user._id,
+        };
+        
+        let doc = { 
+            isActive: true,
+            lastLoggedDate: DateUtil.getNow()
+        }
+
+        return new UserManager()
+                    .update({ criteria, doc })
+                    .then(result => {
+                        if (result.ok === 1) {
+                            const token = AuthService.generateToken(user, 7200);
     
-        return res.status(200).json({ token, userInfo });
+                            return res.status(200).json({ token, userInfo });
+                        }
+ 
+                        return res.status(401).json({ message: 'Unauthorized' });
+                    })
+                    .catch(err => {
+                        next(err);
+
+                        return res.status(500).json({ err });
+                    })
+       
     }
 }
 

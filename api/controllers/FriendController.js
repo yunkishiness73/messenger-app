@@ -137,9 +137,10 @@ FriendController.prototype.unfriend = (req, res, next) => {
 
 FriendController.prototype.search = (req, res) => {
     let currentUser = req.user;
+    let isActive = req.query.isActive;
     
     return new FriendManager()
-                .search({ userID: currentUser._id })
+                .search({ userID: currentUser._id, isActive })
                 .then(friend => {
                     return res.status(200).json({ data: friend });
                 })

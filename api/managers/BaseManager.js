@@ -50,13 +50,18 @@ class BaseManager {
         });
     }
 
-    update(originalEntity) {
+    update(payload) {
         const self = this;
          
         return co(function* update() {
-            const Model = self.getModel();
+           const Model = self.getModel();
+           const { originalEntity, criteria, doc } = payload;
 
-            let updatedEntity = yield Model.updateOne({ username: originalEntity.username }, { isActive: true });
+           if (originalEntity) {
+              return yield Model.updateOne({ _id: originalEntity._id }, doc);
+           }
+
+           return yield Model.updateOne(criteria, doc);
         });
     }
 

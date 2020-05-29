@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const logger = require('morgan');
 const path = require('path');
+const socketio = require('socket.io');
 
 const userRoute = require('./api/routes/user');
 const authRoute = require('./api/routes/auth');
@@ -13,6 +14,7 @@ const friendRoute = require('./api/routes/friend');
 const conversationRoute = require('./api/routes/conversation');
 const messageRoute = require('./api/routes/message');
 const searchRoute = require('./api/routes/search');
+const socketEvent = require('./config/socketEvent');
 
 
 mongoose.connect(process.env.MONGO_LOCAL, { useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true, retryWrites: false }, (err) => {
@@ -50,10 +52,6 @@ const passport = require('passport');
 
 require('./config/passport');
 
-const Conversation = require('./api/models/Conversation');
-const User = require('./api/models/User');
-const FriendRequest = require('./api/models/FriendRequest');
-
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     next(createError(404));
@@ -73,4 +71,9 @@ app.use(function (err, req, res, next) {
 });
 
 
-app.listen(process.env.PORT, () => console.log('Server is running'));
+const server = app.listen(process.env.PORT, () => console.log('Server is running'));
+
+const io = socketio(server);
+
+//initialize socketIO to handle events
+socketEvent(io);

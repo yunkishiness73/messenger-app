@@ -39,6 +39,9 @@ const UserSchema = new mongoose.Schema({
     lastLoggedDate: {
         type: Date
     },
+    socketID: {
+        type: String
+    },
     createdAt: {
         type: Date,
         default: Date.now

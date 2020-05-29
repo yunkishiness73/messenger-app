@@ -16,9 +16,21 @@ class UserManager extends BaseManager {
     }
 
     beforeSave(originalEntity) {
-        originalEntity.password = EncryptionUtil.hashSync(originalEntity.password);
+        const self = this;
 
-        return Promise.resolve(originalEntity);
+        return co(function* beforeSave() {
+            const existedUser = yield self.findByUsername(originalEntity.username);
+
+            if (existedUser) {
+                return Promise.reject({ 
+                    message: 'Username already taken'
+                });
+            }
+    
+            originalEntity.password = EncryptionUtil.hashSync(originalEntity.password);
+    
+            return Promise.resolve(originalEntity);
+        });
     }
 
     getById(id) {
@@ -28,6 +40,16 @@ class UserManager extends BaseManager {
             const Model = self.getModel();
 
             return yield Model.findById(id, '-password');
+        });
+    }
+
+    findByUsername(username, options) {
+        const self = this;
+
+        return co(function* getById() {
+            const Model = self.getModel();
+
+            return yield Model.findOne({ username });
         });
     }
 
