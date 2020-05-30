@@ -2,6 +2,7 @@ const AuthManager = require('../managers/AuthManager');
 const UserManager = require('../managers/UserManager');
 const AuthService =  require('../services/AuthService');
 const DateUtil = require('../helpers/DateUtil');
+const Response = require('../../config/sendResponse');
 
 let AuthController = function AuthController() {};
 

@@ -1,6 +1,7 @@
 const ConversationManager = require('../managers/ConversationManager');
 const MessageManager = require('../managers/MessageManager');
 const Constants = require('../constants/Constants');
+const Response = require('../../config/sendResponse');
 
 let ConversationController = function ConversationController() { };
 
@@ -190,7 +191,10 @@ ConversationController.prototype.getMessages = (req, res, next) => {
             return new MessageManager().getMessagesByConversationID(conversationID, { pageIndex, pageSize });
         })
         .then(messages => {
-            return res.status(200).json({ data: messages });
+            return Response(res, {
+                status: 201,
+                data: messages
+            });
         })
         .catch(err => {
             next(err);
