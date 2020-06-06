@@ -202,4 +202,29 @@ ConversationController.prototype.getMessages = (req, res, next) => {
         });
 }
 
+ConversationController.prototype.leave = (req, res, next) => {
+    let conversationID = req.params.id;
+    let currentUser = req.user;
+
+    return new ConversationManager()
+            .getById(conversationID)
+            .then(conversationEntity => {
+                if (!conversationEntity) {
+                    return res.status(404).json({
+                        error: {
+                            message: 'Conversation not found'
+                        }
+                    });
+                }
+
+                return new ConversationManager().leave({ userID: currentUser._id, conversation: conversationEntity });
+            })
+            .then(result => {
+                return res.status(200).end();
+            })
+            .catch(err => {
+                return res.status(500).json({ error: err });
+            })
+}
+
 module.exports = ConversationController.prototype;

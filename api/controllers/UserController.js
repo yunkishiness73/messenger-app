@@ -5,16 +5,7 @@ let UserController = function UserController() {};
 
 UserController.prototype.create = (req, res, next) => {
     let data = req.body;
-    let file = req.file;
-    let photo;
-
-    if (file && file.mimetype.split("/")[0] !== "image") {
-        return res.status(400).json({ error: { message: 'Photo field must be image type (jpeg,png,jpg,...)' } });
-    } else {
-        photo = file.path.replace(/\\/g, "/");
-        data['photo'] = photo;
-    }
-
+    
     return new UserManager().save(data)
                             .then(entity => {
                                 res.status(201).json({ data: entity });
@@ -30,11 +21,13 @@ UserController.prototype.update = (req, res, next) => {
     let file = req.file;
     let photo;
 
-    if (file && file.mimetype.split("/")[0] !== "image") {
-        return res.status(400).json({ error: { message: 'Photo field must be image type (jpeg,png,jpg,...)' } });
-    } else {
-        photo = file.path.replace(/\\/g, "/");
-        data['photo'] = photo;
+    if (file) {
+        if (file.mimetype.split("/")[0] !== "image") {
+            return res.status(400).json({ error: { message: 'Photo field must be image type (jpeg,png,jpg,...)' } });
+        } else {
+            photo = file.path.replace(/\\/g, "/");
+            data['photo'] = photo;
+        }
     }
    
     if (!id) {

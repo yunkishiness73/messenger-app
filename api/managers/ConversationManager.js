@@ -129,6 +129,20 @@ class ConversationManager extends BaseManager {
                                 ]);
         });
     }
+
+    leave(payload) {
+        return co(function* search() {
+            const { userID, conversation } = payload;
+
+            if (conversation.type === Constants.CONVERSATION_TYPE.Group) {
+                conversation.members.splice(conversation.members.indexOf(userID), 1);
+                return yield conversation.save();
+            }
+        })
+        .catch(err => {
+            Promise.reject(err);
+        });
+    }
     
     search(options) {
         return co(function* search() {

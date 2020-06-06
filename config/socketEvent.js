@@ -6,5 +6,11 @@ module.exports = (io) => {
         socket.on('notifyUserIsActive', payload => {
             console.log(payload);
         });
+
+        socket.on('disconnect', (reason) => {
+            console.log(reason);
+            console.log(`${socket.id} is disconnected`);
+            socket.emit('socketDisconnected', { socketID: socket.id });
+        });
     });
 }
