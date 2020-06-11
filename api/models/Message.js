@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const MessageSchema = new mongoose.Schema({
     type: {
         type: String,
-        enum: ['Text', 'Image', 'File'],
+        enum: ['Text', 'Image', 'Video', 'File', 'Notif'],
         default: 'Text',
         required: true
     },

@@ -5,11 +5,11 @@ const Response = require('../../config/sendResponse');
 
 let ConversationController = function ConversationController() { };
 
-ConversationController.prototype.create = (req, res) => {
-    let { senderID, receiverID, type, title, members } = req.body;
+ConversationController.prototype.create = (req, res, next) => {
+    let { receiverID, type, title, members } = req.body;
     let currentUser = req.user;
 
-    return new ConversationManager().save({ senderID: currentUser._id, receiverID, type, title, members })
+    return new ConversationManager().save({ currentUser, senderID: currentUser._id, receiverID, type, title, members })
         .then(entity => {
             res.status(201).json({ data: entity });
         })
@@ -82,7 +82,7 @@ ConversationController.prototype.addMembers = (req, res) => {
     let currentUser = req.user;
 
     if (!conversationID) {
-        return res.status(400).json({ error: { message: 'Missing Id' } });
+        return res.status(400).json({ error: { message: 'Missing Conversation ID' } });
     }
 
     return new ConversationManager().getById(conversationID)
@@ -103,13 +103,13 @@ ConversationController.prototype.addMembers = (req, res) => {
                     });
                 }
 
-               return new ConversationManager().update({ members, conversation: entity });
+               return new ConversationManager().update({ currentUser, members, conversation: entity });
             })
             .then(result => {
                 return res.status(200).json({ data: result });
             })
             .catch(err => {
-            return res.status(500).json({ error: err });
+                return res.status(500).json({ error: err });
             });
     
 }
@@ -192,7 +192,7 @@ ConversationController.prototype.getMessages = (req, res, next) => {
         })
         .then(messages => {
             return Response(res, {
-                status: 201,
+                status: 200,
                 data: messages
             });
         })

@@ -2,6 +2,8 @@ const co = require('co');
 const Conversation = require('../models/Conversation');
 const BaseManager = require('./BaseManager');
 const Constants = require('../constants/Constants');
+const Message = require('../models/Message');
+const ObjectID = require('mongodb').ObjectID;
 
 class ConversationManager extends BaseManager {
 
@@ -16,7 +18,7 @@ class ConversationManager extends BaseManager {
             let Model = self.getModel();
 
             try {
-                let { senderID, receiverID, type, title, members } = payload;
+                let { currentUser, senderID, receiverID, type, title, members } = payload;
                 let conversation;
                 /*
                 * Populate whether conversation already existed
@@ -58,11 +60,32 @@ class ConversationManager extends BaseManager {
 
                 let savedEntity = yield conversation.save();
 
-                if (!savedEntity) {
-                    return Promise.reject({ message: 'Save entity failed' });
+                if (savedEntity && type === Constants.CONVERSATION_TYPE.Group) {
+                    let msgs = [];
+
+                    msgs.push({
+                        conversation: savedEntity._id,
+                        type: 'Notif',
+                        senderID,
+                        message: Constants.CONVERSATION_MESSAGE.Joined.replace('$1', currentUser.displayName)
+                    });
+
+                    members.forEach((member) => {
+                        let msg = Constants.CONVERSATION_MESSAGE.Added.replace('$1', currentUser.displayName);
+                        msg = msg.replace(`$2`, member.displayName);
+
+                        msgs.push({
+                            conversation: savedEntity._id,
+                            type: 'Notif',
+                            senderID,
+                            message: msg
+                        });
+                    });
+                    
+                   return yield Message.insertMany(msgs);
                 }
 
-                return savedEntity;
+                return Promise.reject({ message: 'Save entity failed' });
             } catch(err) {
                 return Promise.reject(err);
             }
@@ -71,16 +94,46 @@ class ConversationManager extends BaseManager {
 
     update(payload) {
         return co(function* update() {
-            let { title, members, conversation } = payload;
+            let { currentUser, title, members, conversation } = payload;
+            let msgs = [];
+            let msg = '';
 
             if (conversation.type === Constants.CONVERSATION_TYPE.Group) {
                 if (members) {
-                    conversation.members.push(...members);
+                    members.forEach(member => {
+                        if (!conversation.members.includes(ObjectID(member._id))) {
+                            conversation.members.push(member);
+                           
+                            msg = Constants.CONVERSATION_MESSAGE.Added.replace('$1', currentUser.displayName);
+                            msg = msg.replace(`$2`, member.displayName);
+
+                            msgs.push({
+                                conversation: conversation._id,
+                                type: 'Notif',
+                                senderID: currentUser._id,
+                                message: msg
+                            });
+                        }
+                    });
                 } else if (title) {
-                    conversation.title = title || conversation.title;
+                    conversation.title = title;
+
+                    msg = Constants.CONVERSATION_MESSAGE.Renamed.replace('$1', currentUser.displayName);
+                    msg = msg.replace(`$2`, title);
+
+                    msgs.push({
+                        conversation: conversation._id,
+                        type: 'Notif',
+                        senderID: currentUser._id,
+                        message: msg
+                    });
                 }
-             
-                return yield conversation.save();
+
+                if (msgs.length) {
+                    return yield Promise.all([conversation.save(), Message.insertMany(msgs)]);
+                }
+
+               return Promise.resolve();
             }
         })
         .catch(err => {

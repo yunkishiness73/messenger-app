@@ -5,6 +5,10 @@ const ConversationSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    photo: {
+        type: String,
+        required: false
+    },
     type: {
         type: String,
         enum: ['Single', 'Group'],
