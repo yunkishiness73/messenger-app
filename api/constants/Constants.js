@@ -14,6 +14,13 @@ module.exports = {
         Removed: '$1 has removed $2 from this conversation',
         Renamed: '$1 has renamed the conversation to $2',
         Joined: '$1 joined this conversation'
+    },
+
+    USER_STATUS: {
+        Enabled: 'Enabled',
+        Locked: 'Locked',
+        Disabled: 'Disabled',
+        Pending: 'Pending'
     }
 
 }

@@ -3,6 +3,7 @@ const FriendRequest = require('../models/FriendRequest');
 const Friend = require('../models/Friend');
 const User = require('../models/User');
 const BaseManager = require('./BaseManager');
+const Constants = require('../constants/Constants');
 
 class FriendManager extends BaseManager {
 
@@ -20,8 +21,6 @@ class FriendManager extends BaseManager {
             });
 
             let savedEntity = yield friendRequest.save();
-
-            console.log(savedEntity);
 
             if (!savedEntity) return Promise.reject();
 
@@ -125,7 +124,8 @@ class FriendManager extends BaseManager {
                             $or: [ 
                                 { username: new RegExp(q, "gmi") },
                                 { displayName: new RegExp(q, "gmi") }
-                            ]
+                            ],
+                            'status': Constants.USER_STATUS.Enabled
                         }},
                         { $project: { username: 1, firstName: 1, lastName: 1, displayName: 1 } }
                     ]);

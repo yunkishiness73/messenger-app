@@ -185,11 +185,24 @@ class ConversationManager extends BaseManager {
 
     leave(payload) {
         return co(function* search() {
-            const { userID, conversation } = payload;
+            const { currentUser, conversation } = payload;
+            let msg = '';
 
             if (conversation.type === Constants.CONVERSATION_TYPE.Group) {
-                conversation.members.splice(conversation.members.indexOf(userID), 1);
-                return yield conversation.save();
+                if (conversation.members.indexOf(currentUser._id) !== -1) {
+                    conversation.members.splice(conversation.members.indexOf(currentUser._id), 1);
+
+                    msg = Constants.CONVERSATION_MESSAGE.Leaved.replace('$1', currentUser.displayName);
+
+                    let message = new Message({
+                        conversation: conversation._id,
+                        type: 'Notif',
+                        senderID: currentUser._id,
+                        message: msg
+                    })
+
+                    return Promise.all([conversation.save(), message.save()]);
+                }
             }
         })
         .catch(err => {

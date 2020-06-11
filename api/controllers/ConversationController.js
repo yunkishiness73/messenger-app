@@ -24,7 +24,7 @@ ConversationController.prototype.update = (req, res, next) => {
     let currentUser = req.user;
 
     if (!id) {
-        return res.status(400).json({ error: { message: 'Missing Id' } });
+        return res.status(400).json({ error: { message: 'Missing Conversation ID' } });
     }
 
     return new ConversationManager().getById(id)
@@ -46,7 +46,7 @@ ConversationController.prototype.update = (req, res, next) => {
                 });
             }
 
-            return new ConversationManager().update({ conversation: entity, title });
+            return new ConversationManager().update({ currentUser, conversation: entity, title });
         })
         .then(result => {
             return res.status(200).json({ data: result });
@@ -217,9 +217,9 @@ ConversationController.prototype.leave = (req, res, next) => {
                     });
                 }
 
-                return new ConversationManager().leave({ userID: currentUser._id, conversation: conversationEntity });
+                return new ConversationManager().leave({ currentUser, conversation: conversationEntity });
             })
-            .then(result => {
+            .then(() => {
                 return res.status(200).end();
             })
             .catch(err => {
