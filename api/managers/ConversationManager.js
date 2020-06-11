@@ -1,8 +1,9 @@
 const co = require('co');
 const Conversation = require('../models/Conversation');
+const Message = require('../models/Message');
 const BaseManager = require('./BaseManager');
 const Constants = require('../constants/Constants');
-const Message = require('../models/Message');
+const DateUtil = require('../helpers/DateUtil');
 const ObjectID = require('mongodb').ObjectID;
 
 class ConversationManager extends BaseManager {
@@ -29,6 +30,7 @@ class ConversationManager extends BaseManager {
                    case Constants.CONVERSATION_TYPE.Group:
                         conversation = new Conversation({
                             members: [senderID, ...members],
+                            admins: [senderID],
                             type, 
                             title
                         });
@@ -81,8 +83,15 @@ class ConversationManager extends BaseManager {
                             message: msg
                         });
                     });
-                    
-                   return yield Message.insertMany(msgs);
+
+                    let insertedMessage = yield Message.insertMany(msgs);
+
+                    if (insertedMessage.length) {
+                        savedEntity.lastMessage = insertedMessage[insertedMessage.length-1];
+                        savedEntity.updatedAt = DateUtil.getNow();
+
+                        return yield savedEntity.save();
+                    }
                 }
 
                 return Promise.reject({ message: 'Save entity failed' });
@@ -130,7 +139,14 @@ class ConversationManager extends BaseManager {
                 }
 
                 if (msgs.length) {
-                    return yield Promise.all([conversation.save(), Message.insertMany(msgs)]);
+                    let insertedMessage = yield Message.insertMany(msgs);
+                
+                    if (insertedMessage.length) {
+                        conversation.lastMessage = insertedMessage[insertedMessage.length-1];
+                        conversation.updatedAt = DateUtil.getNow();
+                    }
+             
+                    return yield conversation.save();
                 }
 
                return Promise.resolve();
@@ -199,9 +215,16 @@ class ConversationManager extends BaseManager {
                         type: 'Notif',
                         senderID: currentUser._id,
                         message: msg
-                    })
+                    });
 
-                    return Promise.all([conversation.save(), message.save()]);
+                    let insertedMessage = yield message.save();
+
+                    if (insertedMessage) {
+                        conversation.lastMessage = insertedMessage;
+                        conversation.updatedAt = DateUtil.getNow();
+                    }
+
+                    return yield conversation.save();
                 }
             }
         })

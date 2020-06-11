@@ -10,6 +10,8 @@ const requireAuth = passport.authenticate('jwt', { session: false });
 
 /* Routes for Message */
 router.post('/send', requireAuth, Upload.single('attachment'), MessageController.create);
+router.put('/:id/markSeen', requireAuth, MessageController.markSeen);
+
 
 
 
