@@ -7,6 +7,10 @@ module.exports = (io) => {
             socket.friends = payload.friends;
         });
 
+        socket.on('getSocketID', () => {
+            socket.emit('socketID', { socketID: socket.id });
+        });
+
         socket.on('notifyUserIsActive', payload => {
             console.log(payload);
         });
