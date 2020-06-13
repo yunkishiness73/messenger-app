@@ -16,8 +16,10 @@ module.exports = (io) => {
         });
 
         socket.on('join-in-conversations', payload => {
-            payload.conversations = payload.conversations.split('');
-            payload.conversations.forEach(conversation => {
+            //Convert conversations to Array
+            const conversations = payload.conversations.split('');
+
+            conversations.forEach(conversation => {
                 socket.join(conversation);
             });
         });

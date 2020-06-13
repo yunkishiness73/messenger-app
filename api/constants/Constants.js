@@ -21,6 +21,14 @@ module.exports = {
         Locked: 'Locked',
         Disabled: 'Disabled',
         Pending: 'Pending'
+    },
+
+    MESSAGE_TYPE: {
+        Text: 'Text',
+        Image: 'Image',
+        Video: 'Video',
+        Others: 'Others',
+        Notif: 'Notif'  
     }
 
 }
