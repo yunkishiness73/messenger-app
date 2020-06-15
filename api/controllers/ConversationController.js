@@ -119,7 +119,7 @@ ConversationController.prototype.delete = (req, res) => {
     let currentUser = req.user;
 
     if (!conversationID) {
-        return res.status(400).json({ error: { message: 'Missing Id' } });
+        return res.status(400).json({ error: { message: 'Missing Conversation ID' } });
     }
 
     return new ConversationManager().getById(conversationID)
@@ -140,15 +140,11 @@ ConversationController.prototype.delete = (req, res) => {
                     });
                 }
 
-                return new ConversationManager().delete(conversationID);
+                return new ConversationManager().delete({ conversation: entity, currentUser });
             })
             .then(result => {
-                if (result.deletedCount)
+                if (result)
                     return res.status(200).json({ message: 'Deleted conversation successfully' });
-
-                return res.status(500).json({ error: {
-                    message: 'Deleted conversation failed'
-                }});
             })
             .catch(err => {
             return res.status(500).json({ error: err });

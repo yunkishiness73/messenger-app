@@ -1,7 +1,5 @@
 const MessageManager = require('../managers/MessageManager');
 const ConversationManager = require('../managers/ConversationManager');
-var cloudinary = require('cloudinary').v2;
-const fs = require('fs');
 const Constants = require('../constants/Constants');
 
 let MessageController = function MessageController() {};
@@ -9,7 +7,7 @@ let MessageController = function MessageController() {};
 MessageController.prototype.create = (req, res) => {
     let attachment;
     let currentUser = req.user;
-    let { receiverID, conversationType, message, conversationID, title } = req.body;
+    let { receiverID, conversationType, message, conversationID } = req.body;
     let file = req.file;
     let messageType = 'Text';
 
@@ -31,28 +29,13 @@ MessageController.prototype.create = (req, res) => {
                 break;
             case Constants.MESSAGE_TYPE.Video.toLowerCase():
                 messageType = Constants.MESSAGE_TYPE.Video;
-             break;
+                break;
             default:
                 messageType = Constants.MESSAGE_TYPE.Others;
                 break;
         }
-    }
-
-    // cloudinary.config({ 
-    //     cloud_name: 'kietnguyencloud', 
-    //     api_key: '287666537461618', 
-    //     api_secret: 'J7Pk6h1Vol8ij2P0FXiN6mbhzIc' 
-    // });
-
-    // cloudinary.uploader.upload(attachment.fileURL, { resource_type: "raw" }, function(err, result) {
-    //     console.log(result);
-    //     console.log(err);
-    //     fs.unlinkSync(attachment.fileURL);
-    //     res.download('https://res.cloudinary.com/kietnguyencloud/raw/upload/v1591282260/coodl9tpt20q1gfhnm8q.pdf', 'coodl9tpt20q1gfhnm8q.pdf');
-                
-    // });
-                    
-
+    }               
+    
     if (!conversationID) {
         return new ConversationManager()
                    .save({ senderID: currentUser._id, receiverID, type: conversationType })

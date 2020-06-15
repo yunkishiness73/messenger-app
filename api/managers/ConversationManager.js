@@ -176,6 +176,11 @@ class ConversationManager extends BaseManager {
             return yield Model.find({ 
                                     members: { 
                                         $all: [userID]
+                                    },
+                                    deletedBy: {
+                                        $not: {
+                                            $elemMatch: { $eq: userID }
+                                        }
                                     }
                                 },
                                 '-isDeleted',
@@ -253,6 +258,20 @@ class ConversationManager extends BaseManager {
             }
             
         }); 
+    }
+
+    delete(payload) {
+        return co(function* update() {
+            let { conversation, currentUser } = payload;
+        
+            //Delete this conversation with current user
+            conversation.deletedBy.push(currentUser._id);
+
+            return yield conversation.save();
+        })
+        .catch(err => {
+            return Promise.reject(err);
+        });
     }
 
 }
