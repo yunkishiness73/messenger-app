@@ -163,16 +163,7 @@ class ConversationManager extends BaseManager {
         return co(function* search() {
             let { userID } = payload;
             let Model = self.getModel();
-
-            // return yield Model.find({ 
-            //                         members: { 
-            //                             $all: ["5ec344ebcfd7e138f8fc40db", "5ec344ebcfd7e138f8fc40db"]
-            //                         }
-            //                     })
-            //                     .populate({
-            //                         path: 'members',
-            //                         select: 'username displayName firstName lastName'
-            //                     });
+            
             return yield Model.find({ 
                                     members: { 
                                         $all: [userID]
@@ -206,10 +197,47 @@ class ConversationManager extends BaseManager {
 
     leave(payload) {
         return co(function* search() {
-            const { currentUser, conversation } = payload;
+            const { currentUser, conversation, members } = payload;
             let msg = '';
 
             if (conversation.type === Constants.CONVERSATION_TYPE.Group) {
+                /* 
+                * In case, if members exists that means admin removed member from the conversation
+                * Otherwise, member leaved the conversation
+                */
+                if (members) {
+                    let msgs = [];
+
+                    members.forEach(member => {
+                        if (conversation.members.indexOf(member._id) !== -1) {
+                            conversation.members.splice(conversation.members.indexOf(member._id), 1);
+
+                            msg = Constants.CONVERSATION_MESSAGE.Removed.replace('$1', currentUser.displayName);
+                            msg = msg.replace('$2', member.displayName);
+
+                            let message = new Message({
+                                conversation: conversation._id,
+                                type: 'Notif',
+                                senderID: currentUser._id,
+                                message: msg
+                            });
+
+                            msgs.push(message);
+                        }
+                    });
+
+                    if (msgs.length) {
+                        let insertedMessage = yield Message.insertMany(msgs);
+                    
+                        if (insertedMessage.length) {
+                            conversation.lastMessage = insertedMessage[insertedMessage.length-1];
+                            conversation.updatedAt = DateUtil.getNow();
+                        }
+                 
+                        return yield conversation.save();
+                    }
+                }
+
                 if (conversation.members.indexOf(currentUser._id) !== -1) {
                     conversation.members.splice(conversation.members.indexOf(currentUser._id), 1);
 

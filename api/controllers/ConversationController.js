@@ -46,6 +46,14 @@ ConversationController.prototype.update = (req, res, next) => {
                 });
             }
 
+            if (!conversationEntity.admins.includes(currentUser._id) && members) {
+                return res.status(403).json({
+                    error: {
+                        message: 'You must have admin role to remove member from this conversation'
+                    }
+                });
+            }
+
             return new ConversationManager().update({ currentUser, conversation: entity, title });
         })
         .then(result => {
@@ -201,6 +209,7 @@ ConversationController.prototype.getMessages = (req, res, next) => {
 ConversationController.prototype.leave = (req, res, next) => {
     let conversationID = req.params.id;
     let currentUser = req.user;
+    let { members } = req.body;
 
     return new ConversationManager()
             .getById(conversationID)
@@ -213,7 +222,15 @@ ConversationController.prototype.leave = (req, res, next) => {
                     });
                 }
 
-                return new ConversationManager().leave({ currentUser, conversation: conversationEntity });
+                if (!conversationEntity.admins.includes(currentUser._id) && members) {
+                    return res.status(403).json({
+                        error: {
+                            message: 'You must have admin role to remove member from this conversation'
+                        }
+                    });
+                }
+
+                return new ConversationManager().leave({ currentUser, conversation: conversationEntity, members });
             })
             .then(() => {
                 return res.status(200).end();
