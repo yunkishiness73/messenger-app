@@ -29,7 +29,8 @@ AuthController.prototype.login = (req, res, next) => {
         username: user.username,
         firstName: user.firstName,
         lastName: user.lastName,
-        displayName: user.displayName
+        displayName: user.displayName,
+        photo: user.photo
     };
 
     if (user) {

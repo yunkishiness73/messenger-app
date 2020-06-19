@@ -12,6 +12,16 @@ class ConversationManager extends BaseManager {
         return Conversation;
     }
 
+    getById(id, options) {
+        const self = this;
+
+        return co(function* getById() {
+            const Model = self.getModel();
+
+            return yield Model.findById(id);
+        });
+    }
+
     save(payload) {
         const self = this;
 
@@ -181,7 +191,7 @@ class ConversationManager extends BaseManager {
                                 .populate([
                                     {
                                         path: 'members',
-                                        select: 'username displayName firstName lastName'
+                                        select: 'username displayName firstName lastName photo'
                                     },
                                     {
                                         path: 'lastMessage',

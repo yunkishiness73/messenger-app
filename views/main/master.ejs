@@ -19,9 +19,9 @@
 </head>
 <body onload="spinLoaded()">
     <!--Css main loader-->
-    <div class="master-loader"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
 
      <!--Navbar-->
+    <%- include("navbar/navbar"); %>
     
     <%- content %>
 
@@ -40,10 +40,15 @@
     <script src="bower_components/jquery-colorbox/jquery.colorbox-min.js"></script>
     <script src="socket.io/socket.io.js"></script>
     <script src="emojione/lib/js/emojione.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 
     <!-- JS -->
+    <script src="js/mainConfig.js"></script>
     <script src="js/baseService.js"></script>
     <script src="js/conversation.js"></script>
+    <script src="js/user.js"></script>
+
+
     
 </body>
 </html>

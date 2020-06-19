@@ -44,7 +44,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 //Routers
-
 app.use('/', mainRoute)
 app.use('/api/users', userRoute);
 app.use('/api/auth', authRoute);

@@ -33,48 +33,16 @@
                 <li>
                     <a href="#contactsModal" data-toggle="modal" title="Quản lý liên lạc" id="show-modal-contacts">
                         <i class="fa fa-user-plus"></i>
-                        <% if((countAllContactsSent + countAllContactsReceived) > 0) { %>
                             <div class="noti_contact_counter">
-                                <%= (countAllContactsSent + countAllContactsReceived) %>
+                             20
                             </div>
-                        <% } else { %>
                             <div class="noti_contact_counter display-none"></div>
-                        <% } %>
                     </a>
                 </li>
-                <li>
-                    <a href="javascript:void(0)" id="noti_Button" data-toggle="modal" title="Thông báo">
-                        <i class="fa fa-globe"></i>
-                        <% if(countNotifUnread > 0) { %>
-                            <div class="noti_counter">
-                                <%= countNotifUnread %>
-                            </div>
-                        <% } else { %>
-                            <div class="noti_counter display-none"></div>
-                        <% } %>
-                        <div id="noti_Container">
-                            <div id="notifications">
-                                <a href="javascript:void(0)" id="popup-mark-notif-as-read">
-                                    Đánh dấu tất cả là đã đọc
-                                </a>
-                                <div class="noti_content">
-                                    <% notifications.forEach(function(notification) { %>
-                                        <%- notification %>
-                                    <% }); %>
-                                </div>
-                                <div class="seeAll">
-                                    <a href="#notificationsModal" data-toggle="modal">
-                                        Xem tất cả
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </li>
-                <li class="dropdown" id="dropdown-navbar-user" data-uid="<%= user._id %>">
+                <li class="dropdown" id="dropdown-navbar-user" data-uid="">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                        <img id="navbar-avatar" class="avatar-small" src="images/users/<%= user.avatar %>" alt="">
-                        <span id="navbar-username"><%= user.username %></span>
+                        <img id="navbar-photo" class="avatar-small" src=">" alt="">
+                        <span id="navbar-displayName"></span>
                         <span class="caret"></span>
                     </a>
                     <ul class="dropdown-menu">

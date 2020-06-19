@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:1337/api/auth';
+let API_URL = 'http://localhost:1337/api/auth';
 
 function showRegisterForm() {
     $('.loginBox').fadeOut('fast', function () {
@@ -47,7 +47,7 @@ function auth() {
 
         $.ajax({
             type: "POST",
-            url: `${BASE_URL}`,
+            url: `${API_URL}`,
             data: {
                 username,
                 password
@@ -58,7 +58,7 @@ function auth() {
                     localStorage.setItem('token', JSON.stringify(data.token));
                     localStorage.setItem('userInfo', JSON.stringify(data.userInfo));
 
-                    window.open("http://locahost:1337/home", "_self");
+                    window.open("http://localhost:1337/home", "_self");
                 }
             },
             error: function(xhr, statusText, err){
@@ -66,7 +66,7 @@ function auth() {
                     localStorage.removeItem('token');
                     localStorage.removeItem('userInfo');
 
-                    window.open("http://locahost:1337/signin", "_self");
+                    window.open("http://localhost:1337/signin", "_self");
                 }
             }
         })

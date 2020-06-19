@@ -192,13 +192,14 @@ ConversationController.prototype.getMessages = (req, res, next) => {
                 });
             }
 
+            console.log(conversationEntity);
+
             return new MessageManager().getMessagesByConversationID(conversationID, { pageIndex, pageSize });
         })
         .then(messages => {
-            return Response(res, {
-                status: 200,
-                data: messages
-            });
+           return res.status(200).json({
+               data: messages
+           });
         })
         .catch(err => {
             next(err);
