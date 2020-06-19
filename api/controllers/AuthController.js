@@ -6,7 +6,6 @@ const Response = require('../../config/sendResponse');
 
 let AuthController = function AuthController() {};
 
-
 AuthController.prototype.verifyEmail = (req, res) => {
     const token = req.params.token;
 

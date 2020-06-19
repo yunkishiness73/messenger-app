@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const logger = require('morgan');
 const path = require('path');
 const socketio = require('socket.io');
+const expressEJSExtend = require('express-ejs-extend');
 
 const userRoute = require('./api/routes/user');
 const authRoute = require('./api/routes/auth');
@@ -14,6 +15,8 @@ const friendRoute = require('./api/routes/friend');
 const conversationRoute = require('./api/routes/conversation');
 const messageRoute = require('./api/routes/message');
 const searchRoute = require('./api/routes/search');
+const mainRoute = require('./api/routes/main');
+
 const socketEvent = require('./config/socketEvent');
 
 
@@ -29,6 +32,7 @@ mongoose.set('debug', true);
 
 const app = express();
 
+app.engine('ejs', expressEJSExtend);
 app.set("views", path.join(__dirname, '/views'));
 app.set('view engine', 'ejs');
 
@@ -40,6 +44,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 //Routers
+
+app.use('/', mainRoute)
 app.use('/api/users', userRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/friends', friendRoute);
