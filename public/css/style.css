@@ -862,6 +862,14 @@ label:focus,
   max-width: 50%;
 }
 
+.notif {
+  color:rgb(138, 141, 145);;
+  display: block;
+  text-align: center;
+  clear: both;
+  padding: 7px 5px;
+}
+
 .bubble-attachment-file {
   background-color: #ECF0FE !important;
 }

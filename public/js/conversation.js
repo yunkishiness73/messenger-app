@@ -61,7 +61,7 @@ function handleConversationClick() {
         let conversationID = $(this).attr("data-conversation-id");
         let conversation = $(this).attr("data-conversation");
 
-        fetchConversationMessage(conversationID);
+        fetchConversationMessage({conversationID});
         
         console.log($(this).data('conversation')._id);
         console.log(conversation._id);
@@ -71,8 +71,7 @@ function handleConversationClick() {
 }
 
 function showConversationInfo(conversation) {
-   $("[data-chat='']").attr("data-chat", conversation._id);
-   console.log(conversation.conversationName);
+   $("[data-chat]").attr("data-chat", conversation._id);
    $('.conversation-name').html(conversation.conversationName);
 }
 
@@ -89,8 +88,6 @@ function fetchConversations() {
         dataType: "JSON",
         success: function (data, textStatus, xhr) {
             if (xhr.status === 200) {
-
-                console.log(data);
                 let conversations = renderConversation(data['data']);
 
                 $('.people').html('');
@@ -102,12 +99,17 @@ function fetchConversations() {
 
 }
 
-function fetchConversationMessage(conversationID) {
+function fetchConversationMessage(payload) {
     errorHandler.checkTokenExisted();
+
+    let conversationID = payload.conversationID;
+    let pageIndex = payload.pageIndex || 1;
+    let pageSize = payload.pageSize || 20;
+    let type = payload.type || 'append';
 
     $.ajax({
         type: "GET",
-        url: `api/conversations/${conversationID}/messages?pageIndex=1&pageSize=30`,
+        url: `api/conversations/${conversationID}/messages?pageIndex=${pageIndex}&pageSize=${pageSize}`,
         headers: {
             'Authorization': `Bearer ${baseService.token}`,
             'Content-Type': 'application/json'
@@ -115,9 +117,7 @@ function fetchConversationMessage(conversationID) {
         dataType: "JSON",
         success: function (data, textStatus, xhr) {
             if (xhr.status === 200) {
-                let messages = renderMessage(data['data']);
-                $('.chat').html('');
-                $('.chat').append(messages);
+                appendToMessageList(data['data'], type);
             }
         },
         error: errorHandler.onError
@@ -125,55 +125,163 @@ function fetchConversationMessage(conversationID) {
 
 }
 
+function fetchOlderMessage() {
+    $('.chat').scroll(function(e) {
+        console.log('before: ' +  $('.chat').scrollTop())
+        console.log('heihgt: ' +  $('.chat').height())
+        console.log('scroll height: ' +  $('.chat').prop('scrollHeight'))
+        if ($(".chat").scrollTop() < 10 && $(".content").scrollTop() >= 0) {
+         
+
+            const conversationID = $('.chat').attr('data-chat');
+            let pageIndex = parseInt($('.pageIndex').html());
+            
+            $('.pageIndex').html(++pageIndex);
+        
+            fetchConversationMessage({
+                conversationID,
+                pageIndex,
+                type: 'prepend'
+            });    
+        }
+    });
+}
+
+function appendToMessageList(data, type = 'append') {
+    if (Array.isArray(data)) {
+        //Set content is empty
+        if (data.length === 0) {
+            $('.chat').scrollTop(20);
+        } else {
+            let messages = renderMessage(data);
+
+            if (type === 'append') {
+                $('.chat').html('');
+                $('.chat').append(messages);
+                $('.pageIndex').html(1);
+                
+                scrollToBottom();
+            } else {
+                $('.chat').prepend(messages);    
+            }
+        }
+    } else {
+        let messages = renderMessage(data);
+        
+        $('.chat').append(messages);
+        $('.pageIndex').html(1);
+
+        scrollToBottom();
+    }
+}
+
 function renderMessage(messages) {
     let messageList = ``;
 
-    messages.forEach(message => {
-        messageList += Message(message);
-    });
+    if (Array.isArray(messages)) {
+        messages.forEach(message => {
+            messageList += Message(message);
+        });
 
-    return messageList;
+        return messageList;
+    }
+
+    return Message(messages);
+}
+
+function scrollToBottom() {
+    $('.chat').scrollTop($('.chat').prop('scrollHeight'));
 }
 
 function Message(message) {
     let userInfo = JSON.parse(localStorage.getItem('userInfo'));
     let creator = '';
 
-    if (message.senderID._id === userInfo._id) {
-        creator = 'me';
-    } else {
-        creator = 'you';
+    if (typeof message.senderID === 'object') {
+        if (message.senderID._id === userInfo._id) {
+            creator = 'me';
+        } else {
+            creator = 'you';
+        }
+    } else if (typeof message.senderID === 'string') {
+        if (message.senderID === userInfo._id) {
+            creator = 'me';
+        } else {
+            creator = 'you';
+        }
     }
-
+  
     if (message.type === "Text") {
         return `<div class="convert-emoji bubble ${creator}" data-mess-id="${message._id}">
              ${message.message}
         </div>`;
     }
 
-    if (message.type === "Image" || message.type === "Video") {
+    if (message.type === "Image") {
         return `<div class="bubble bubble-image-file ${creator}" data-mess-id="${message._id}">
             <img src="${BASE_URL}/${message.attachment.fileName}" class="show-image-chat" />
         </div>`;
     }
 
-    if (message.type === "Others") {
+    if (message.type === "Notif") {
+        return `<div class="notif" data-mess-id="${message._id}">
+            ${message.message}
+        </div>`;
+    }
+
         return `<div class="bubble bubble-attachment-file ${creator}" data-mess-id="${message._id}">
             <a href="${BASE_URL}/${message.attachment.fileName}" download="${message.attachment.fileName}">
                 ${message.attachment.fileName}
             </a>
         </div>`;
-    }
+}
 
-    if (message.type === "Notif") {
-        return `<div class="bubble  bubble-attachment-file" data-mess-id="${message._id}">
-            ${message.message}
-        </div>`;
-    }
+function newMessage() {
+    errorHandler.checkTokenExisted();
+
+    $('.write-chat').keypress(function(e) {
+        if (e.keyCode == 13) {
+            let conversationID = $(this).attr('data-chat');
+            let message = $.trim($(this).val());
+           
+            if (message) {
+                $.ajax({
+                    type: "POST",
+                    url: `api/messages/send`,
+                    headers: {
+                        'Authorization': `Bearer ${baseService.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    data:  JSON.stringify({
+                        conversationID: conversationID,
+                        messageType: 'Text',
+                        message: message
+                    }),
+                    dataType: "json",
+                    success: function (data, textStatus, xhr) {
+                        if (xhr.status === 200 || xhr.status === 201) {
+                        //Reload conversation to get newest message
+                          fetchConversations();
+                          
+                          $('.write-chat').val('');
+                          appendToMessageList(data['data']);
+                        }
+                    },
+                    error: errorHandler.onError
+                })
+            }
+        }
+    })
 }
 
 $(function () {
+    scrollToBottom();
+
     fetchConversations();
 
     handleConversationClick();
+
+    newMessage();
+
+    fetchOlderMessage();
 });
