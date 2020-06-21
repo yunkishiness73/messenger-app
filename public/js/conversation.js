@@ -236,42 +236,87 @@ function Message(message) {
         </div>`;
 }
 
-function newMessage() {
-    errorHandler.checkTokenExisted();
+// function newMessage() {
+//     errorHandler.checkTokenExisted();
 
-    $('.write-chat').keypress(function(e) {
-        if (e.keyCode == 13) {
-            let conversationID = $(this).attr('data-chat');
-            let message = $.trim($(this).val());
+//     $('.write-chat').keypress(function(e) {
+//         if (e.keyCode == 13) {
+//             alert('here')
+//             let conversationID = $(this).attr('data-chat');
+//             let message = $.trim($(this).val());
            
-            if (message) {
-                $.ajax({
-                    type: "POST",
-                    url: `api/messages/send`,
-                    headers: {
-                        'Authorization': `Bearer ${baseService.token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    data:  JSON.stringify({
-                        conversationID: conversationID,
-                        messageType: 'Text',
-                        message: message
-                    }),
-                    dataType: "json",
-                    success: function (data, textStatus, xhr) {
-                        if (xhr.status === 200 || xhr.status === 201) {
-                        //Reload conversation to get newest message
-                          fetchConversations();
+//             if (message) {
+//                 $.ajax({
+//                     type: "POST",
+//                     url: `api/messages/send`,
+//                     headers: {
+//                         'Authorization': `Bearer ${baseService.token}`,
+//                         'Content-Type': 'application/json'
+//                     },
+//                     data:  JSON.stringify({
+//                         conversationID: conversationID,
+//                         messageType: 'Text',
+//                         message: message
+//                     }),
+//                     dataType: "json",
+//                     success: function (data, textStatus, xhr) {
+//                         if (xhr.status === 200 || xhr.status === 201) {
+//                         //Reload conversation to get newest message
+//                           fetchConversations();
                           
-                          $('.write-chat').val('');
-                          appendToMessageList(data['data']);
-                        }
-                    },
-                    error: errorHandler.onError
-                })
-            }
+//                           $('.write-chat').val('');
+//                           appendToMessageList(data['data']);
+//                         }
+//                     },
+//                     error: errorHandler.onError
+//                 })
+//             }
+//         }
+//     })
+// }
+
+function handleImageUploadEvent() {
+    $(".image-chat").on('change', function () {
+        let conversationID = $(this).attr('data-chat');
+        let file = $(this).prop('files')[0];
+
+        if (file && file.type.match(/image/)) {
+            let fd = new FormData();
+            
+            fd.append('conversationID', conversationID);
+            fd.append('attachment', file);
+            
+            $.ajax({
+                url: '/api/messages/send',
+                method: 'POST',
+                data: fd,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'Authorization': `Bearer ${baseService.token}`
+                },
+                success: function (data, textStatus, xhr) {
+                    if (xhr.status === 200 || xhr.status === 201) {
+                        fetchConversations();
+                      
+                        appendToMessageList(data['data']);
+                    }
+                },
+                error: function (xhr, errorMessage) {
+                    alert(errorMessage);
+                }
+            });
+        } else {
+            alert("Vui lòng chọn hình ảnh");
         }
-    })
+    });
+}
+
+function handleFileUploadEvent() {
+    $(".attachment-chat").on('change', function () {
+        let conversationID = $(this).attr('data-chat');
+        console.log($(this).prop('files')[0]);
+    });
 }
 
 $(function () {
@@ -281,7 +326,10 @@ $(function () {
 
     handleConversationClick();
 
-    newMessage();
+    handleFileUploadEvent();
+
+    handleImageUploadEvent();
+    // newMessage();
 
     fetchOlderMessage();
 });

@@ -23,10 +23,10 @@ function nineScrollRight(divId) {
 }
 
 function enableEmojioneArea(divId) {
-  $(`#write-chat-${divId}`).emojioneArea({
+  $(`#write-chat`).emojioneArea({
     standalone: false,
     pickerPosition: 'top',
-    filtersPosition: 'bottom',
+    filtersPosition: 'top',
     tones: false,
     autocomplete: false,
     inline: true,
@@ -34,23 +34,57 @@ function enableEmojioneArea(divId) {
     search: false,
     shortnames: false,
     events: {
-      keyup: function(editor, event) {
+      keyup: function(editor, e) {
         //Gán giá trị thay đổi vào thẻ input đã bị ẩn
-        $(`#write-chat-${divId}`).val(this.getText());
+        $(`#write-chat`).val(this.getText());
+      
+        //If button Enter is press then send message to server
+        if (e.keyCode == 13) {
+          let conversationID = $('#write-chat').attr('data-chat');
+          let message = $.trim($('#write-chat').val());
+         
+          if (message) {
+            $.ajax({
+                type: "POST",
+                url: `api/messages/send`,
+                headers: {
+                    'Authorization': `Bearer ${baseService.token}`,
+                    'Content-Type': 'application/json'
+                },
+                data:  JSON.stringify({
+                    conversationID: conversationID,
+                    messageType: 'Text',
+                    message: message
+                }),
+                dataType: "json",
+                success: function (data, textStatus, xhr) {
+                    if (xhr.status === 200 || xhr.status === 201) {
+                    //Reload conversation to get newest message
+                      fetchConversations();
+                      
+                      $('.emojionearea-editor').html('');
+                      appendToMessageList(data['data']);
+                    }
+                },
+                error: errorHandler.onError
+            })
+          }
+        }
       },
       click: function() {
-        //Bật lắng nghe dom cho việc chat tin nhắn văn bản emoji
-        textAndEmojiChat(divId);
-        // Bật chức năng typing on
-        typingOn(divId);
+        
+        // //Bật lắng nghe dom cho việc chat tin nhắn văn bản emoji
+        // textAndEmojiChat();
+        // // Bật chức năng typing on
+        // typingOn(divId);
       },
       blur: function () {
-        // Tắt chức năng typing on
-        typingOff(divId);
+        // // Tắt chức năng typing on
+        // typingOff(divId);
       },
     },
   });
-  $('.icon-chat').bind('click', function(event) {
+  $('body').on('click', '.icon-chat', function(event) {
     event.preventDefault();
     $('.emojionearea-button').click();
     $('.emojionearea-editor').focus();
@@ -147,7 +181,8 @@ function changeTypeChat() {
 }
 
 function changeScreenChat() {
-  $(".room-chat").unbind().on("click", function () {
+  $(".room-chat").on("click", function () {
+    alert('click')
     let divId = $(this).find("li").data("chat");
 
     $(".person").removeClass("active");
@@ -159,7 +194,6 @@ function changeScreenChat() {
     nineScrollRight(divId);
 
     // Bật emoji, tham số truyền vào là id của box nhập nội dung tin nhắn
-    enableEmojioneArea(divId);
 
     //bật lắng nghe dom cho việc chat tin nhắn hình ảnh
     imageChat(divId);
@@ -186,6 +220,8 @@ function bufferToBase64 (buffer) {
 };
 
 $(document).ready(function() {
+  enableEmojioneArea();
+
   // Hide số thông báo trên đầu icon mở modal contact
   showModalContacts();
 
