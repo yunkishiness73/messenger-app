@@ -88,6 +88,7 @@ function fetchConversations() {
         dataType: "JSON",
         success: function (data, textStatus, xhr) {
             if (xhr.status === 200) {
+                console.log(data['data']);
                 let conversations = renderConversation(data['data']);
 
                 $('.people').html('');
@@ -130,7 +131,7 @@ function fetchOlderMessage() {
         console.log('before: ' +  $('.chat').scrollTop())
         console.log('heihgt: ' +  $('.chat').height())
         console.log('scroll height: ' +  $('.chat').prop('scrollHeight'))
-        if ($(".chat").scrollTop() < 10 && $(".content").scrollTop() >= 0) {
+        if ($(".chat").scrollTop() < 50 && $(".content").scrollTop() >= 0) {
          
 
             const conversationID = $('.chat').attr('data-chat');
@@ -151,7 +152,7 @@ function appendToMessageList(data, type = 'append') {
     if (Array.isArray(data)) {
         //Set content is empty
         if (data.length === 0) {
-            $('.chat').scrollTop(20);
+            $('.chat').scrollTop(100);
         } else {
             let messages = renderMessage(data);
 
