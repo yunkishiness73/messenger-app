@@ -11,15 +11,14 @@ function nineScrollLeft() {
   });
 }
 
-function nineScrollRight(divId) {
-  $(`.right`).niceScroll({
+function nineScrollRight() {
+  $(`.right .chat`).niceScroll({
     smoothscroll: true,
     horizrailenabled: false,
     cursorcolor: '#ECECEC',
     cursorwidth: '7px',
     scrollspeed: 50
   });
-  $(`.right`).scrollTop($(`.right`)[0].scrollHeight);
 }
 
 function enableEmojioneArea(divId) {
@@ -162,12 +161,6 @@ function gridPhotos(layoutNumber) {
   });
 }
 
-function flashMasterNotify() {
-  let notify = $(".master-success-message").text();
-  if (notify.length) {
-    alertify.notify(notify, "success", 7);
-  }
-};
 
 function changeTypeChat() {
   $("#select-type-chat").bind("change", function(){
@@ -182,29 +175,29 @@ function changeTypeChat() {
   });
 }
 
-function changeScreenChat() {
-  $(".room-chat").on("click", function () {
-    alert('dont load hể')
-    let divId = $(this).find("li").data("chat");
+// function changeScreenChat() {
+//   $(".room-chat").on("click", function () {
+//     alert('dont load hể')
+//     let divId = $(this).find("li").data("chat");
 
-    $(".person").removeClass("active");
-    $(`.person[data-chat=${divId}]`).addClass("active");
+//     $(".person").removeClass("active");
+//     $(`.person[data-chat=${divId}]`).addClass("active");
 
-    $(this).tab("show");
+//     $(this).tab("show");
 
-    //Cấu hình thanh cuộn bên bõ chat rightSide.ejs mỗi khi ckick vào 1 cuộc trò chuyện cụ thể
-    nineScrollRight(divId);
+//     //Cấu hình thanh cuộn bên bõ chat rightSide.ejs mỗi khi ckick vào 1 cuộc trò chuyện cụ thể
+//     nineScrollRight(divId);
 
-    // Bật emoji, tham số truyền vào là id của box nhập nội dung tin nhắn
+//     // Bật emoji, tham số truyền vào là id của box nhập nội dung tin nhắn
 
-    //bật lắng nghe dom cho việc chat tin nhắn hình ảnh
-    imageChat(divId);
+//     //bật lắng nghe dom cho việc chat tin nhắn hình ảnh
+//     imageChat(divId);
 
-    //Lắng nghe dom cho việc gửi file chat
-    attachmentChat(divId);
+//     //Lắng nghe dom cho việc gửi file chat
+//     attachmentChat(divId);
 
-  });
-}
+//   });
+// }
 
 function convertEmoji () {
   $(".convert-emoji").each(function() {
@@ -218,30 +211,33 @@ $(document).ready(function() {
   enableEmojioneArea();
 
   // Hide số thông báo trên đầu icon mở modal contact
-  showModalContacts();
+  //showModalContacts();
 
   // Bật tắt popup notification
-  configNotification();
+  //configNotification();
 
   // Cấu hình thanh cuộn
   nineScrollLeft();
 
+  // Cấu hình thanh cuộn
+ // nineScrollRight();
+
   // Icon loading khi chạy ajax
-  ajaxLoading();
+  //ajaxLoading();
 
   // Hiển thị hình ảnh grid slide trong modal tất cả ảnh, tham số truyền vào là số ảnh được hiển thị trên 1 hàng.
   // Tham số chỉ được phép trong khoảng từ 1 đến 5
   gridPhotos(5);
 
   //Flash message on master.js
-  flashMasterNotify();
+  //flashMasterNotify();
 
   //Thay đổi kiểu trò chuyện
-  changeTypeChat();
+  //changeTypeChat();
 
   // Thay đổi màn hình chat
-  changeScreenChat();
+  //changeScreenChat();
 
   //convert unicode emoji to image emoji
-  convertEmoji();
+  //convertEmoji();
 });

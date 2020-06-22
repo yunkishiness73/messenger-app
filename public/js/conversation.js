@@ -42,7 +42,7 @@ function Conversation(conversation) {
 
     return `
         <a data-conversation='${JSON.stringify(conversation)}' href="#" class="room-chat" data-conversation-id="${conversation._id}">
-            <li class="person active" data-chat="${conversation._id}">
+            <li class="person" data-chat="${conversation._id}">
                 <div class="left-avatar">
                     <div class="dot"></div>
                     <img src="${imgURL}" alt="">
@@ -69,7 +69,7 @@ function handleConversationClick() {
         //Show chat screen
         $('#screen-chat').show();
 
-        nineScrollRight();
+        // nineScrollRight();
 
         let conversationID = $(this).attr("data-conversation-id");
         let conversation = $(this).attr("data-conversation");
@@ -80,7 +80,14 @@ function handleConversationClick() {
         console.log(conversation._id);
         console.log(JSON.parse(conversation));
         showConversationInfo(JSON.parse(conversation));
+
+        configImagesModal($(this).data('conversation')._id);
     })
+}
+
+function configImagesModal(conversationID) {
+    $('.imagesModal').attr('id', `imagesModal_${conversationID}`);
+    $('.show-images').attr('href', `#imagesModal_${conversationID}`);
 }
 
 function showConversationInfo(conversation) {
@@ -144,46 +151,59 @@ function fetchOlderMessage() {
         console.log('before: ' +  $('.chat').scrollTop())
         console.log('heihgt: ' +  $('.chat').height())
         console.log('scroll height: ' +  $('.chat').prop('scrollHeight'))
-        if ($(".chat").scrollTop() < 50 && $(".content").scrollTop() >= 0) {
-         
+        if ($(".chat").scrollTop() <= 30) {
+            $('.pageIndex').css('display', 'block');
+        } else {
+            $('.pageIndex').css('display', 'none');
+        }
+    });
 
-            const conversationID = $('.chat').attr('data-chat');
-            let pageIndex = parseInt($('.pageIndex').html());
-            
-            $('.pageIndex').html(++pageIndex);
+    $('body').on('click', '.pageIndex', function(e) {
+        const conversationID = $('.chat').attr('data-chat');
+        let pageIndex = parseInt($('.pageIndex').attr('data-currentPage'));
+        let hasMessage = parseInt($('.pageIndex').attr('data-hasMessage'));
         
+        if (hasMessage) {
+            $('.pageIndex').attr('data-currentPage', ++pageIndex);
+    
             fetchConversationMessage({
                 conversationID,
                 pageIndex,
                 type: 'prepend'
             });    
+        } else {
+            alertify.notify('No messages found', 'error', 7);
         }
-    });
+    })
 }
 
 function appendToMessageList(data, type = 'append') {
     if (Array.isArray(data)) {
         //Set content is empty
         if (data.length === 0) {
-            $('.chat').scrollTop(100);
+            $('.pageIndex').attr('data-hasMessage', 0);   
         } else {
             let messages = renderMessage(data);
 
             if (type === 'append') {
                 $('.chat').html('');
                 $('.chat').append(messages);
-                $('.pageIndex').html(1);
+                $('.pageIndex').attr('data-currentPage', 1);
+                $('.pageIndex').hide();
                 
                 scrollToBottom();
             } else {
-                $('.chat').prepend(messages);    
+                alert('ahihi')
+                $('.chat').prepend(messages);   
+                $('.chat').scrollTop(Math.round($('.chat').prop('scrollHeight')/3)); 
             }
         }
     } else {
         let messages = renderMessage(data);
         
         $('.chat').append(messages);
-        $('.pageIndex').html(1);
+        $('.pageIndex').attr('data-currentPage', 1);
+        $('.pageIndex').attr('data-hasMessage', 1);
 
         scrollToBottom();
     }
@@ -191,15 +211,24 @@ function appendToMessageList(data, type = 'append') {
 
 function renderMessage(messages) {
     let messageList = ``;
+    let imgs = '';
 
     if (Array.isArray(messages)) {
         messages.forEach(message => {
+            if (message.type === "Image") {
+                console.log(`${BASE_URL}/${message.attachment.fileName}`);
+                imgs += `<img src="${BASE_URL}/${message.attachment.fileName}" alt="">`;
+            }
+
             messageList += Message(message);
         });
 
+        $('.all-images').html('');
+        $('.all-images').append(imgs);
+
         return messageList;
     }
-
+    
     return Message(messages);
 }
 
@@ -289,20 +318,18 @@ function Message(message) {
 //     })
 // }
 
-function handleImageUploadEvent() {
-    $(".image-chat").on('change', function () {
-        let maxSize = 3*1000*1000;
+function handleFileUploadEvent() {
+    $(".attachment-chat").on('change', function () {
+        let maxSize = 10*1000*1000;
         let conversationID = $(this).attr('data-chat');
         let file = $(this).prop('files')[0];
 
-        if (file && file.type.match(/image/)) {
-            if (file.size > maxSize) {
-                alertify.notify('Image must less than 3MB', 'error', 7);
-                return false;
-            }
-
+        if (file.size > maxSize) {
+            alertify.notify('Image must less than 10MB', 'error', 7);
+            return false;
+        } else {
             let fd = new FormData();
-            
+                
             fd.append('conversationID', conversationID);
             fd.append('attachment', file);
             
@@ -324,30 +351,18 @@ function handleImageUploadEvent() {
                     alert(errorMessage);
                 }
             });
-        } else {
-            alertify.notify('Please select image for upload', 'error', 7);
-        }
-    });
-}
-
-function handleFileUploadEvent() {
-    $(".attachment-chat").on('change', function () {
-        let conversationID = $(this).attr('data-chat');
-        console.log($(this).prop('files')[0]);
-    });
+        }    
+     });
 }
 
 $(function () {
     scrollToBottom();
-
+    
     fetchConversations();
 
     handleConversationClick();
 
     handleFileUploadEvent();
-
-    handleImageUploadEvent();
-    // newMessage();
 
     fetchOlderMessage();
 });
