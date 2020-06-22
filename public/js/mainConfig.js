@@ -1,4 +1,4 @@
-const socket = io();
+const socket = io('http://localhost:1337');
 
 
 function nineScrollLeft() {
@@ -12,14 +12,14 @@ function nineScrollLeft() {
 }
 
 function nineScrollRight(divId) {
-  $(`.right .chat[data-chat = ${divId}]`).niceScroll({
+  $(`.right`).niceScroll({
     smoothscroll: true,
     horizrailenabled: false,
     cursorcolor: '#ECECEC',
     cursorwidth: '7px',
     scrollspeed: 50
   });
-  $(`.right .chat[data-chat = ${divId}]`).scrollTop($(`.right .chat[data-chat = ${divId}]`)[0].scrollHeight);
+  $(`.right`).scrollTop($(`.right`)[0].scrollHeight);
 }
 
 function enableEmojioneArea(divId) {
@@ -60,10 +60,12 @@ function enableEmojioneArea(divId) {
                 success: function (data, textStatus, xhr) {
                     if (xhr.status === 200 || xhr.status === 201) {
                     //Reload conversation to get newest message
-                      fetchConversations();
+                      // fetchConversations();
                       
                       $('.emojionearea-editor').html('');
-                      appendToMessageList(data['data']);
+                      // appendToMessageList(data['data']);
+
+                      emitNewPrivateMessage(data['data']);
                     }
                 },
                 error: errorHandler.onError
@@ -182,7 +184,7 @@ function changeTypeChat() {
 
 function changeScreenChat() {
   $(".room-chat").on("click", function () {
-    alert('click')
+    alert('dont load hể')
     let divId = $(this).find("li").data("chat");
 
     $(".person").removeClass("active");
@@ -201,8 +203,6 @@ function changeScreenChat() {
     //Lắng nghe dom cho việc gửi file chat
     attachmentChat(divId);
 
-    // Lắng nghe dom cho việc video call
-    videoChat(divId);
   });
 }
 
@@ -213,11 +213,6 @@ function convertEmoji () {
       $(this).html(converted);
   });
 }
-
-function bufferToBase64 (buffer) {
-  return btoa(new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
-  );
-};
 
 $(document).ready(function() {
   enableEmojioneArea();
@@ -247,13 +242,6 @@ $(document).ready(function() {
   // Thay đổi màn hình chat
   changeScreenChat();
 
-  //click vào phần tử đầu tiên của cuộc trò chuyện khi load trang web
-  $("ul.people").find("a")[0].click();
-
   //convert unicode emoji to image emoji
   convertEmoji();
-
-  $("#video-chat-group").bind("click", function() {
-    alertify.notify("Tính năng này ko khả dụng với cuộc hội thoại nhóm. Vui lòng thử lại trên trò truyện cá nhân", "error", 7);
-  })
 });

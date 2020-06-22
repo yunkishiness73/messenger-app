@@ -41,7 +41,7 @@ function openRegisterModal() {
 function auth() {
     $('.btn-login').on('click', function(e) {
         e.preventDefault();
-
+        
         let username = $('.email').val();
         let password = $('.password').val();
 

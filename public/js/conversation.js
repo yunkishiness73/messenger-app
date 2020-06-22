@@ -3,10 +3,16 @@ const BASE_URL = 'http://localhost:1337';
 
 function renderConversation(conversations) {
     let conversationList = ``;
+    let conversationIDs = [];
 
     conversations.forEach(conversation => {
+        conversationIDs.push(conversation._id);
         conversationList += Conversation(conversation);
     });
+
+    console.log(conversationIDs);
+
+    sendConversationsList(conversationIDs);
 
     return conversationList;
 }
@@ -36,7 +42,7 @@ function Conversation(conversation) {
 
     return `
         <a data-conversation='${JSON.stringify(conversation)}' href="#" class="room-chat" data-conversation-id="${conversation._id}">
-            <li class="person" data-chat="${conversation._id}">
+            <li class="person active" data-chat="${conversation._id}">
                 <div class="left-avatar">
                     <div class="dot"></div>
                     <img src="${imgURL}" alt="">
@@ -57,6 +63,13 @@ function Conversation(conversation) {
 function handleConversationClick() {
     $('body').on('click', '.room-chat', function(e) {
         e.preventDefault();
+
+        console.log($(this).children());
+
+        //Show chat screen
+        $('#screen-chat').show();
+
+        nineScrollRight();
 
         let conversationID = $(this).attr("data-conversation-id");
         let conversation = $(this).attr("data-conversation");
@@ -278,10 +291,16 @@ function Message(message) {
 
 function handleImageUploadEvent() {
     $(".image-chat").on('change', function () {
+        let maxSize = 3*1000*1000;
         let conversationID = $(this).attr('data-chat');
         let file = $(this).prop('files')[0];
 
         if (file && file.type.match(/image/)) {
+            if (file.size > maxSize) {
+                alertify.notify('Image must less than 3MB', 'error', 7);
+                return false;
+            }
+
             let fd = new FormData();
             
             fd.append('conversationID', conversationID);
@@ -298,9 +317,7 @@ function handleImageUploadEvent() {
                 },
                 success: function (data, textStatus, xhr) {
                     if (xhr.status === 200 || xhr.status === 201) {
-                        fetchConversations();
-                      
-                        appendToMessageList(data['data']);
+                        emitNewPrivateMessage(data['data']);
                     }
                 },
                 error: function (xhr, errorMessage) {
@@ -308,7 +325,7 @@ function handleImageUploadEvent() {
                 }
             });
         } else {
-            alert("Vui lòng chọn hình ảnh");
+            alertify.notify('Please select image for upload', 'error', 7);
         }
     });
 }

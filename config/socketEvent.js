@@ -17,15 +17,21 @@ module.exports = (io) => {
 
         socket.on('join-in-conversations', payload => {
             //Convert conversations to Array
-            const conversations = payload.conversations.split('');
+            const conversations = payload.conversations;
+
+            console.log('server received: ');
 
             conversations.forEach(conversation => {
+                console.log(conversation);
                 socket.join(conversation);
             });
         });
 
         socket.on('private-message', payload => {
-            io.to(payload.conversationID).emit('new-messages', payload.message);
+            console.log(payload.message);
+            console.log(socket.adapter.rooms);
+            io.in('game').emit
+            io.in(payload.message.conversation).emit('new-messages', payload.message);
         });
 
         socket.on('send-friend-request', payload => {
