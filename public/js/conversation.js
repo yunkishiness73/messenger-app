@@ -81,13 +81,18 @@ function handleConversationClick() {
         console.log(JSON.parse(conversation));
         showConversationInfo(JSON.parse(conversation));
 
-        configImagesModal($(this).data('conversation')._id);
+        configAttachmentsModal($(this).data('conversation')._id);
     })
 }
 
-function configImagesModal(conversationID) {
+function configAttachmentsModal(conversationID) {
+    //Config image modal
     $('.imagesModal').attr('id', `imagesModal_${conversationID}`);
     $('.show-images').attr('href', `#imagesModal_${conversationID}`);
+
+    //Config files modal
+    $('.attachmentsModal').attr('id', `attachmentsModal_${conversationID}`);
+    $('.show-attachments').attr('href', `#attachmentsModal_${conversationID}`);
 }
 
 function showConversationInfo(conversation) {
@@ -183,25 +188,38 @@ function appendToMessageList(data, type = 'append') {
         if (data.length === 0) {
             $('.pageIndex').attr('data-hasMessage', 0);   
         } else {
-            let messages = renderMessage(data);
+            let { msgs, imgs, files } = renderMessage(data);
 
             if (type === 'append') {
                 $('.chat').html('');
-                $('.chat').append(messages);
+                $('.chat').append(msgs);
+
+                $('.all-images').html('');
+                $('.all-images').append(imgs);
+
+                $('.list-attachments').html('');
+                $('.list-attachments').append(files);
+
                 $('.pageIndex').attr('data-currentPage', 1);
                 $('.pageIndex').hide();
                 
                 scrollToBottom();
             } else {
-                alert('ahihi')
-                $('.chat').prepend(messages);   
+                $('.chat').prepend(msgs);
+                $('.all-images').prepend(imgs);
+                $('.list-attachments').prepend(files);
+
                 $('.chat').scrollTop(Math.round($('.chat').prop('scrollHeight')/3)); 
             }
         }
     } else {
-        let messages = renderMessage(data);
+        let { message, img, file } = renderMessage(data);
         
-        $('.chat').append(messages);
+        $('.chat').append(message);
+        $('.all-images').append(img);
+        $('.list-attachments').append(file);
+
+
         $('.pageIndex').attr('data-currentPage', 1);
         $('.pageIndex').attr('data-hasMessage', 1);
 
@@ -209,27 +227,46 @@ function appendToMessageList(data, type = 'append') {
     }
 }
 
+function classifyMessage(msg) {
+    let img = '', file = '', message = '';
+
+    if (msg.type === "Image") {
+        img = `<img src="${BASE_URL}/${msg.attachment.fileName}" alt="">`;
+    }
+
+    if (msg.type === "Video" || msg.type === "Others") {
+         file = (`<li>
+                    <a href="${BASE_URL}/${msg.attachment.fileName}" download="${msg.attachment.fileName}">
+                        ${msg.attachment.fileName}
+                    </a>
+                </li>`);
+    }
+
+    message = Message(msg);
+
+    return { img, file, message };
+}
+
 function renderMessage(messages) {
-    let messageList = ``;
+    let messageList = '';
     let imgs = '';
+    let files = '';
 
     if (Array.isArray(messages)) {
         messages.forEach(message => {
-            if (message.type === "Image") {
-                console.log(`${BASE_URL}/${message.attachment.fileName}`);
-                imgs += `<img src="${BASE_URL}/${message.attachment.fileName}" alt="">`;
-            }
+           let classifiedMsg= classifyMessage(message);
 
-            messageList += Message(message);
+           console.log( classifyMessage(message));
+
+           imgs += classifiedMsg['img'];
+           files += classifiedMsg['file'];
+           messageList += classifiedMsg['message'];
         });
 
-        $('.all-images').html('');
-        $('.all-images').append(imgs);
-
-        return messageList;
+        return { msgs: messageList, imgs, files };
     }
     
-    return Message(messages);
+    return classifyMessage(messages);
 }
 
 function scrollToBottom() {
