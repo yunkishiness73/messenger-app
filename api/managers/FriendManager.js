@@ -118,7 +118,7 @@ class FriendManager extends BaseManager {
             try {
                 let { userID, q, searchType, isActive } = options;
                 
-                if (searchType) {
+                if (searchType === Constants.SEARCH_TYPE.Contact) {
                     return yield User.aggregate([
                         { $match: { 
                             $or: [ 
@@ -128,6 +128,27 @@ class FriendManager extends BaseManager {
                             'status': Constants.USER_STATUS.Enabled
                         }},
                         { $project: { username: 1, firstName: 1, lastName: 1, displayName: 1 } }
+                    ]);
+                }
+
+                if (searchType === Constants.SEARCH_TYPE.Friend) {
+                    console.log('serach========')
+                    return yield Friend.aggregate([
+                        { $match: { userID } },
+                        { $lookup: { from: 'users', localField: 'friendID', foreignField: '_id', as: 'friendID' } },
+                        { $unwind: { path: '$friendID' } },
+                        { $project: { 
+                            "isDeleted": 0, "isBlocked": 0, "friendID.password": 0,
+                            "friendID.isDeleted": 0, "friendID.createdAt": 0, "friendID.updatedAt": 0 
+                        }},
+                        { $match:  {
+                            $or: [ 
+                                { 'friendID.username': new RegExp(q, "gmi") },
+                                { 'friendID.displayName': new RegExp(q, "gmi") }
+                            ],
+                            'friendID.status': Constants.USER_STATUS.Enabled
+                        }},
+                        { $sort: { 'friendID.displayName': 1 } }
                     ]);
                 }
 

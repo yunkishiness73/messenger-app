@@ -29,6 +29,11 @@ module.exports = {
         Video: 'Video',
         Others: 'Others',
         Notif: 'Notif'  
+    },
+
+    SEARCH_TYPE: {
+        Contact: 'contacts',
+        Friend: 'friends'
     }
 
 }

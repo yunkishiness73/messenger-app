@@ -27,6 +27,8 @@ class SearchManager extends BaseManager {
                 return;
             case "contacts": 
                 return new FriendManager().search(options);
+            case "friends": 
+                return new FriendManager().search(options);
             case "groups": 
 
                 return;
