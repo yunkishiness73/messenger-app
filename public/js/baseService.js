@@ -6,6 +6,8 @@ const errorHandler = {
             localStorage.removeItem('userInfo');
 
         	window.open("http://localhost:1337/signin", "_self");
+        } else {
+            alertify.notify(`${xhr.status}`, 'error', 7);
         }
     },
     checkTokenExisted: function() {

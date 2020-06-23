@@ -5,6 +5,10 @@ function showUserInfo() {
 
     $('#navbar-displayName').html(userInfo.displayName);
     $('#navbar-photo').attr("src", photo);
+
+    let conversationIDs = [userInfo._id];
+
+    sendConversationsList(conversationIDs);
 }
 
 $(function () {

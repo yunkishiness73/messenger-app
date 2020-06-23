@@ -10,8 +10,6 @@ function renderConversation(conversations) {
         conversationList += Conversation(conversation);
     });
 
-    console.log(conversationIDs);
-
     sendConversationsList(conversationIDs);
 
     return conversationList;
@@ -64,8 +62,6 @@ function handleConversationClick() {
     $('body').on('click', '.room-chat', function(e) {
         e.preventDefault();
 
-        console.log($(this).children());
-
         //Show chat screen
         $('#screen-chat').show();
 
@@ -76,10 +72,7 @@ function handleConversationClick() {
 
         fetchConversationMessage({conversationID});
         
-        console.log($(this).data('conversation')._id);
-        console.log(conversation._id);
-        console.log(JSON.parse(conversation));
-        showConversationInfo(JSON.parse(conversation));
+        showConversationInfo(JSON.parse(conversation), conversation);
 
         configAttachmentsModal($(this).data('conversation')._id);
     })
@@ -95,9 +88,29 @@ function configAttachmentsModal(conversationID) {
     $('.show-attachments').attr('href', `#attachmentsModal_${conversationID}`);
 }
 
-function showConversationInfo(conversation) {
+function showConversationInfo(conversation, originalEntity) {
    $("[data-chat]").attr("data-chat", conversation._id);
    $('.conversation-name').html(conversation.conversationName);
+
+   $('.pageIndex').attr('data-hasMessage', 1);
+   $('.pageIndex').attr('data-currentPage', 1);
+
+   if (conversation.type === 'Group') {
+        $('.show-member-tab').show();
+        $('.show-number-members').html(conversation.members.length);
+        $('.number-members').attr('data-conversation', originalEntity);
+        $('#btn-create-group-chat').attr('data-conversationID', conversation._id);
+   } else if(conversation.type === 'Single') {
+        $('.show-member-tab').hide();
+   }
+}
+
+function showGroupModal() {
+    $('.number-members').click(function (e) { 
+        let conversation = JSON.parse($(this).attr('data-conversation'));
+
+        $('#btn-create-group-chat').attr('data-conversationID', conversation._id);
+    });
 }
 
 function fetchConversations() {
@@ -113,7 +126,6 @@ function fetchConversations() {
         dataType: "JSON",
         success: function (data, textStatus, xhr) {
             if (xhr.status === 200) {
-                console.log(data['data']);
                 let conversations = renderConversation(data['data']);
 
                 $('.people').html('');
@@ -255,8 +267,6 @@ function renderMessage(messages) {
     if (Array.isArray(messages)) {
         messages.forEach(message => {
            let classifiedMsg= classifyMessage(message);
-
-           console.log( classifyMessage(message));
 
            imgs += classifiedMsg['img'];
            files += classifiedMsg['file'];
@@ -402,4 +412,6 @@ $(function () {
     handleFileUploadEvent();
 
     fetchOlderMessage();
+
+    showGroupModal();
 });

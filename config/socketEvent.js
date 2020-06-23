@@ -15,6 +15,17 @@ module.exports = (io) => {
             console.log(payload);
         });
 
+        socket.on('group-chat-creation', payload => {
+            let conversation = payload.conversation;
+
+            console.log(conversation);
+
+            conversation.members.forEach(m => {
+                console.log(m);
+                io.in(m).emit('new-group-creation', conversation);
+            });
+        });
+
         socket.on('join-in-conversations', payload => {
             //Convert conversations to Array
             const conversations = payload.conversations;
@@ -30,7 +41,6 @@ module.exports = (io) => {
         socket.on('private-message', payload => {
             console.log(payload.message);
             console.log(socket.adapter.rooms);
-            io.in('game').emit
             io.in(payload.message.conversation).emit('new-messages', payload.message);
         });
 

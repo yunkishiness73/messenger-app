@@ -29,7 +29,6 @@ ConversationController.prototype.update = (req, res, next) => {
 
     return new ConversationManager().getById(id)
         .then(entity => {
-            console.log(entity)
             if (entity == null) {
                 return res.status(404).json({
                     error: {
@@ -223,13 +222,13 @@ ConversationController.prototype.leave = (req, res, next) => {
                     });
                 }
 
-                if (!conversationEntity.admins.includes(currentUser._id) && members) {
-                    return res.status(403).json({
-                        error: {
-                            message: 'You must have admin role to remove member from this conversation'
-                        }
-                    });
-                }
+                // if (!conversationEntity.admins.includes(currentUser._id) && members) {
+                //     return res.status(403).json({
+                //         error: {
+                //             message: 'You must have admin role to remove member from this conversation'
+                //         }
+                //     });
+                // }
 
                 return new ConversationManager().leave({ currentUser, conversation: conversationEntity, members });
             })
