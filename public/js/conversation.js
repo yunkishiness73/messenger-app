@@ -65,17 +65,29 @@ function handleConversationClick() {
         //Show chat screen
         $('#screen-chat').show();
 
+
+
         // nineScrollRight();
 
         let conversationID = $(this).attr("data-conversation-id");
         let conversation = $(this).attr("data-conversation");
 
-        fetchConversationMessage({conversationID});
-        
-        showConversationInfo(JSON.parse(conversation), conversation);
+        beforeFetchConversationMessage(JSON.parse(conversation));
 
-        configAttachmentsModal($(this).data('conversation')._id);
+        // fetchConversationMessage({conversationID});
+        
+        // showConversationInfo(JSON.parse(conversation), conversation);
+
+        // configAttachmentsModal($(this).data('conversation')._id);
     })
+}
+
+function beforeFetchConversationMessage(conversation) {
+    showConversationInfo(conversation, JSON.stringify(conversation));
+
+    configAttachmentsModal(conversation._id);
+
+    fetchConversationMessage({conversationID: conversation._id });
 }
 
 function configAttachmentsModal(conversationID) {

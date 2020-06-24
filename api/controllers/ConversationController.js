@@ -232,8 +232,8 @@ ConversationController.prototype.leave = (req, res, next) => {
 
                 return new ConversationManager().leave({ currentUser, conversation: conversationEntity, members });
             })
-            .then(() => {
-                return res.status(200).end();
+            .then(result => {
+                return res.status(200).json({ data: result });
             })
             .catch(err => {
                 return res.status(500).json({ error: err });

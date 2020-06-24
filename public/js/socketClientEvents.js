@@ -49,7 +49,8 @@ socket.on('new-group-creation', conversation => {
     if (currentConv && currentConv === conversation._id) {
         fetchConversations();
 
-        fetchConversationMessage({ conversationID: conversation._id });
+
+        beforeFetchConversationMessage(conversation);
     } else {
         fetchConversations();
     }

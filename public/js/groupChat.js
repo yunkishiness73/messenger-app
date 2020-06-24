@@ -39,24 +39,24 @@ function createGroupChat() {
 
         errorHandler.checkTokenExisted();
                 
-                $.ajax({
-                    type: "POST",
-                    url: `api/conversations/${conversationID}/leave`,
-                    headers: {
-                        'Authorization': `Bearer ${baseService.token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    dataType: "JSON",
-                    success: function (data, textStatus, xhr) {
-                        alert('thanh cong 1');
-                        if (xhr.status === 200 || xhr.status === 201) {
-                            alert('thanh cong');
-                            $('#groupChatModal').modal('toggle');
-                            fetchConversations();
-                        }
-                    },
-                    error: errorHandler.onError
-                })
+        $.ajax({
+            type: "POST",
+            url: `api/conversations/${conversationID}/leave`,
+            headers: {
+                'Authorization': `Bearer ${baseService.token}`,
+                'Content-Type': 'application/json'
+            },
+            dataType: "JSON",
+            success: function (data, textStatus, xhr) {
+                if (xhr.status === 200 || xhr.status === 201) {
+                    $('#groupChatModal').modal('toggle');
+                    fetchConversations();
+                    emitGroupChatCreation(data['data']);
+                    $('#screen-chat').hide();
+                }
+            },
+            error: errorHandler.onError
+        })
 
         // swal({
         //     title: "Are you sure to leave this group ?",
@@ -127,7 +127,9 @@ function createGroupChat() {
     });
 
     $('body').on('click', '.add-user', function(e) {
+        console.log('Add user');
         console.log(members);
+        let conversationID =  $('#btn-create-group-chat').attr('data-conversationID');
         let uid = $(this).data("uid");
 
         let friendObj = JSON.parse($(this).attr('data-friend'));
@@ -143,11 +145,49 @@ function createGroupChat() {
         });
 
         if (flag) {
-            members.push(friendObj);
-            $("#friends-added").append(friend);
-            $(this).remove();
-            $("#groupChatModal .list-user-added").show();
-            $("#group-chat-friends").find("div[data-uid=" + uid + "]").remove();
+            if (conversationID) {
+
+                errorHandler.checkTokenExisted();
+
+                alertify.notify('cbi call api ne', 'success', 7);
+                    
+                $.ajax({
+                    type: "POST",
+                    url: `api/conversations/${conversationID}/members`,
+                    headers: {
+                        'Authorization': `Bearer ${baseService.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    dataType: "JSON",
+                    data: JSON.stringify({
+                        members: [
+                            member
+                        ]
+                    }),
+                    success: function (data, textStatus, xhr) {
+                        if (xhr.status === 200 || xhr.status === 201) {
+                            $("#friends-added").append(friend);
+                            $("#group-chat-friends").find("div[data-uid=" + uid + "]").remove();
+
+                            fetchConversations();
+                            emitGroupChatCreation(data['data']);
+                        }
+                    },
+                    error: errorHandler.onError
+                })
+            } else {
+                members.push(friendObj);
+                $("#friends-added").append(friend);
+                $(this).remove();
+                $("#groupChatModal .list-user-added").show();
+                $("#group-chat-friends").find("div[data-uid=" + uid + "]").remove();
+    
+            }
+            console.log('=======+========');
+            console.log('Sau khi Add user');
+            console.log(members);
+        } else {
+            alertify.warning('Warning notification message.', 7); 
         }
     });
 
@@ -183,7 +223,16 @@ function createGroupChat() {
               })
               .done(function(data, textStatus, xhr) {
                 if (xhr.status === 200 || xhr.status === 201) {
-                    alert('remove thanh cong');
+                    alertify.notify('Remove succcessfully', 'success', 7);
+                    $("#friends-added").find("div[data-uid=" + uid + "]").remove();
+                    emitGroupChatCreation(data['data']);
+                    members = members.filter(member => {
+                        return member._id !== uid;
+                    });
+
+                       
+                    console.log('after remove: ');
+                    console.log(members);
                  }
               })
               .fail(errorHandler.onError)
@@ -195,8 +244,10 @@ function createGroupChat() {
             });
 
             console.log('after remove: ');
-            console.log(members);
+                    console.log(members);
         }
+
+     
     });
 
     $('body').on('click', '#btn-create-group-chat', function(e) {
