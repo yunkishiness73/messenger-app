@@ -47,10 +47,14 @@ socket.on('new-group-creation', conversation => {
     let currentConv = $('.right').attr('data-chat');
 
     if (currentConv && currentConv === conversation._id) {
-        fetchConversations();
-
-
-        beforeFetchConversationMessage(conversation);
+       refetchConversations().then(() => {
+        console.log('conversation in pm')   ;
+        console.log(conversation);
+            beforeFetchConversationMessage(conversation);
+        })
+        .catch(err => {
+            alertify.notify(err, 'error', 7);
+        })
     } else {
         fetchConversations();
     }

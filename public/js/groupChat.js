@@ -102,9 +102,11 @@ function createGroupChat() {
 
     $('body').on('click', '.number-members', function(e) {
         e.preventDefault();
-
+    
         let currentUser = JSON.parse(localStorage.getItem('userInfo'));
         let conversation = JSON.parse($(this).attr('data-conversation'));
+        $('#btn-create-group-chat').attr('data-conversationID', conversation._id);
+
         let isAdmin = false;
 
         if (conversation.admins.indexOf(currentUser._id) != -1) {
@@ -117,6 +119,8 @@ function createGroupChat() {
         });
 
         members = conversation.members;
+
+        console.log(members);
 
         $("#friends-added").html('');
         $("#friends-added").append(friendsList);
@@ -148,8 +152,6 @@ function createGroupChat() {
             if (conversationID) {
 
                 errorHandler.checkTokenExisted();
-
-                alertify.notify('cbi call api ne', 'success', 7);
                     
                 $.ajax({
                     type: "POST",
@@ -161,7 +163,7 @@ function createGroupChat() {
                     dataType: "JSON",
                     data: JSON.stringify({
                         members: [
-                            member
+                            friendObj
                         ]
                     }),
                     success: function (data, textStatus, xhr) {
@@ -325,7 +327,7 @@ function displaySearchResults(friends, actionType='create', options) {
 
             if (isAdmin) {
                 if (currentUser._id === friend._id) {
-                    friendsList += Friend(friend, 'leave&remove');
+                    friendsList += Friend(friend, 'leave');
                 } else {
                     friendsList += Friend(friend, 'remove');
                 }

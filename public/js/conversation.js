@@ -101,6 +101,8 @@ function configAttachmentsModal(conversationID) {
 }
 
 function showConversationInfo(conversation, originalEntity) {
+    console.log('show conversation info');
+    console.log(originalEntity);
    $("[data-chat]").attr("data-chat", conversation._id);
    $('.conversation-name').html(conversation.conversationName);
 
@@ -108,22 +110,28 @@ function showConversationInfo(conversation, originalEntity) {
    $('.pageIndex').attr('data-currentPage', 1);
 
    if (conversation.type === 'Group') {
+        let currentConv = $(`.people>a[data-conversation-id=${conversation._id}]`).attr('data-conversation');
+
+        console.log('Curreent conv');
+        console.log(currentConv);
+
+
         $('.show-member-tab').show();
         $('.show-number-members').html(conversation.members.length);
-        $('.number-members').attr('data-conversation', originalEntity);
+        $('.number-members').attr('data-conversation', currentConv);
         $('#btn-create-group-chat').attr('data-conversationID', conversation._id);
    } else if(conversation.type === 'Single') {
         $('.show-member-tab').hide();
    }
 }
 
-function showGroupModal() {
-    $('.number-members').click(function (e) { 
-        let conversation = JSON.parse($(this).attr('data-conversation'));
+// function showGroupModal() {
+//     $('.number-members').click(function (e) { 
+//         let conversation = JSON.parse($(this).attr('data-conversation'));
 
-        $('#btn-create-group-chat').attr('data-conversationID', conversation._id);
-    });
-}
+//         $('#btn-create-group-chat').attr('data-conversationID', conversation._id);
+//     });
+// }
 
 function fetchConversations() {
     errorHandler.checkTokenExisted();
@@ -147,6 +155,33 @@ function fetchConversations() {
         error: errorHandler.onError
     })
 
+}
+
+function refetchConversations() {
+    return new Promise((resolve, reject) => {
+        errorHandler.checkTokenExisted();
+        alert('chay trong day ne')
+        $.ajax({
+            type: "GET",
+            url: `${API_URL}`,
+            headers: {
+                'Authorization': `Bearer ${baseService.token}`,
+                'Content-Type': 'application/json'
+            },
+            dataType: "JSON",
+            success: function (data, textStatus, xhr) {
+                if (xhr.status === 200) {
+                    let conversations = renderConversation(data['data']);
+
+                    $('.people').html('');
+                    $('.people').append(conversations);
+
+                    resolve(data['data']);
+                }
+            },
+            error: errorHandler.onError
+        })
+    })
 }
 
 function fetchConversationMessage(payload) {
@@ -425,5 +460,5 @@ $(function () {
 
     fetchOlderMessage();
 
-    showGroupModal();
+    // showGroupModal();
 });
