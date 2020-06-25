@@ -4,6 +4,7 @@ const Friend = require('../models/Friend');
 const User = require('../models/User');
 const BaseManager = require('./BaseManager');
 const Constants = require('../constants/Constants');
+const ObjectID = require('mongodb').ObjectID;
 
 class FriendManager extends BaseManager {
 
@@ -15,16 +16,63 @@ class FriendManager extends BaseManager {
         return co(function* sendFriendRequest() {
             const { senderID, receiverID } = payload;
 
-            const friendRequest = new FriendRequest({
-                senderID,
-                receiverID
+            let entity = yield FriendRequest.find({
+                $or: [
+                    { 
+                        senderID: senderID,
+                        receiverID: receiverID
+                    },
+                    { 
+                        senderID: receiverID,
+                        receiverID: senderID,
+                    } 
+                ]
             });
 
-            let savedEntity = yield friendRequest.save();
+            console.log('--------+---------');
+            console.log(entity);
 
-            if (!savedEntity) return Promise.reject();
+            if (Array.isArray(entity) && entity.length === 0) {
+                const friendRequest = new FriendRequest({
+                    senderID,
+                    receiverID
+                });
 
-            return savedEntity;
+                let savedEntity = yield friendRequest.save();
+
+                if (!savedEntity) {
+                    return Promise.reject({
+                        message: 'The both of you are friend already'
+                    });
+                }
+    
+                return savedEntity.populate([
+                    {
+                        path: 'senderID',
+                        select: 'username firstName lastName photo',
+                    },
+                    {
+                        path: 'receiverID',
+                        select: 'username firstName lastName photo',
+                    }
+                ]);                       
+            } else {
+                let friendRequest = entity[0];
+
+                if (friendRequest.status === Constants.FRIEND_REQUEST_STATUS.Rejected) {
+                    friendRequest.status = Constants.FRIEND_REQUEST_STATUS.Pending;
+
+                    return yield friendRequest.save();
+                } else if (friendRequest.status === Constants.FRIEND_REQUEST_STATUS.Accepted) {
+                    return Promise.reject({
+                        message: 'The both of you are friend already'
+                    });
+                } else if (friendRequest.status === Constants.FRIEND_REQUEST_STATUS.Pending) {
+                    return Promise.reject({
+                        message: 'You sent friend requests to this person'
+                    });
+                }
+            }
         });
     }
 
@@ -34,11 +82,11 @@ class FriendManager extends BaseManager {
                 .populate([
                     {
                         path: 'senderID',
-                        select: 'username firstName lastName',
+                        select: 'username firstName lastName displayName photo',
                     },
                     {
                         path: 'receiverID',
-                        select: 'username firstName lastName',
+                        select: 'username firstName lastName displayName photo',
                     }
                 ]);
         })
@@ -50,11 +98,11 @@ class FriendManager extends BaseManager {
                 .populate([
                     {
                         path: 'senderID',
-                        select: 'username firstName lastName',
+                        select: 'username firstName lastName displayName photo',
                     },
                     {
                         path: 'receiverID',
-                        select: 'username firstName lastName',
+                        select: 'username firstName lastName displayName photo',
                     }
                 ]);
         })
@@ -89,13 +137,15 @@ class FriendManager extends BaseManager {
     rejectFriendRequest(friendRequestID) {
         return co(function* getFriendsRequest() {
             try {
-                let updatedEntity = yield FriendRequest.updateOne({ _id: friendRequestID }, { status: 'Rejected' });
+                let updatedEntity = yield FriendRequest.findOneAndUpdate({ _id: friendRequestID }, { status: 'Rejected' }, {
+                    new: true
+                });
 
-                if (!updatedEntity.ok) {
+                if (!updatedEntity) {
                     return Promise.reject({ message: 'Rejected friend request failed' });
                 }
 
-                return Promise.resolve({ message: 'Rejected friend request successfully' });
+                return updatedEntity;
             } catch (err) {
                 return Promise.reject(err);
             }

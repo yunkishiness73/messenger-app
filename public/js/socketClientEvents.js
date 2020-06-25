@@ -28,6 +28,12 @@ function emitNewPrivateMessage(message) {
     });
 }
 
+function emitAcceptFriendRequest(users) {
+    socket.emit('accept-friend-request', {
+        users
+    });
+}
+
 socket.on('new-messages', message => {
     //Reload conversation to get newest message
     fetchConversations();
@@ -59,3 +65,11 @@ socket.on('new-group-creation', conversation => {
         fetchConversations();
     }
 });
+
+socket.on('notify-accept-friend-request', payload => {
+    fetchFriendsList();
+
+    fetchFriendsRequest();
+
+    fetchImcommingRequest();
+})

@@ -160,7 +160,6 @@ function fetchConversations() {
 function refetchConversations() {
     return new Promise((resolve, reject) => {
         errorHandler.checkTokenExisted();
-        alert('chay trong day ne')
         $.ajax({
             type: "GET",
             url: `${API_URL}`,

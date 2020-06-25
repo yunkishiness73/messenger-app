@@ -194,7 +194,13 @@ function createGroupChat() {
     });
 
     $('body').on('click', '.create-group-chat', function(e) {
+        $('#input-name-group-chat').val('')
+        $('#group-chat-friends').html('');
+        $("#friends-added").html('');
+        $("#groupChatModal .list-user-added").hide();
+
         $('#btn-create-group-chat').removeAttr('data-conversationID');
+        $('#input-search-friend-to-add-group-chat').val('');
     });
 
     $('body').on('click', '.remove-user', function(e) {

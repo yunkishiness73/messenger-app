@@ -91,8 +91,8 @@ FriendController.prototype.reject = (req, res) => {
     return new FriendManager()
                .getFriendRequestByID(friendRequestID)
                 .then(friendRequest => {
-                    if (!friendRequest.receiverID.equals(currentUser._id)) {
-                        return res.status(403).json({ message: 'Cannot accept friend request' });
+                    if ((!friendRequest.receiverID.equals(currentUser._id)) && (!friendRequest.senderID.equals(currentUser._id))) {
+                        return Promise.reject({ message: 'Cannot accept friend request' });
                     }
  
                     return new FriendManager().rejectFriendRequest(friendRequestID);

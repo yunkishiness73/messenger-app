@@ -20,11 +20,17 @@ const mainRoute = require('./api/routes/main');
 const socketEvent = require('./config/socketEvent');
 
 
-mongoose.connect(process.env.MONGO_LOCAL, { useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true, retryWrites: false }, (err) => {
-    if (err)
-        console.log('Mongo connected failed ' + err);
-    else
-        console.log('Mongo connected successfully');
+mongoose.connect(process.env.MONGO_LOCAL, {
+    useFindAndModify: false, 
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    retryWrites: false 
+    }, (err) => {
+        if (err)
+            console.log('Mongo connected failed ' + err);
+        else
+            console.log('Mongo connected successfully');
 });
 
 mongoose.set('debug', true);

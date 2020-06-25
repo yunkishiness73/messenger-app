@@ -34,6 +34,12 @@ module.exports = {
     SEARCH_TYPE: {
         Contact: 'contacts',
         Friend: 'friends'
+    },
+
+    FRIEND_REQUEST_STATUS: {
+        Accepted: 'Accepted',
+        Pending: 'Pending',
+        Rejected: 'Rejected'
     }
 
 }

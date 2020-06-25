@@ -21,19 +21,14 @@ module.exports = (io) => {
             console.log(conversation);
 
             conversation.members.forEach(m => {
-                console.log(m);
                 io.in(m).emit('new-group-creation', conversation);
             });
         });
 
         socket.on('join-in-conversations', payload => {
-            //Convert conversations to Array
             const conversations = payload.conversations;
 
-            console.log('server received: ');
-
             conversations.forEach(conversation => {
-                console.log(conversation);
                 socket.join(conversation);
             });
         });
@@ -44,6 +39,7 @@ module.exports = (io) => {
             io.in(payload.message.conversation).emit('new-messages', payload.message);
         });
 
+        /* SOCKET FOR FRIEND REQUEST */
         socket.on('send-friend-request', payload => {
             let data = {
                 message: 'New incomming request'
@@ -55,9 +51,13 @@ module.exports = (io) => {
             let data = {
                 message: 'Accepted your friend request'
             };
-            io.to(payload.socketID).emit('notify-accept-friend-request', data);
+
+            payload.users.forEach(m => {
+                io.in(m).emit('notify-accept-friend-request', data);
+            });
         });
 
+        /* SOCKET FOR TYPING EVENT */
         socket.on("user-typing", payload => {
             let data = {
                 message: `${socket.id} is typing`
@@ -71,6 +71,7 @@ module.exports = (io) => {
             };
             socket.to(payload.conversationID).emit('user-stop-typing', data);
         });
+
 
         socket.on('disconnect', (reason) => {
             console.log(`${socket.id} is disconnected`);
