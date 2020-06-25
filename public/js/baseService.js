@@ -7,7 +7,11 @@ const errorHandler = {
 
         	window.open("http://localhost:1337/signin", "_self");
         } else {
-            alertify.notify(`${xhr.status}`, 'error', 7);
+            if (xhr.responseJSON.error.message) {
+                alertify.notify(`${xhr.responseJSON.error.message}`, 'error', 7);
+            } else {
+                alertify.notify(`${error}`, 'error', 7);
+            }
         }
     },
     checkTokenExisted: function() {

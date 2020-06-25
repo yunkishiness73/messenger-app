@@ -182,7 +182,6 @@ class FriendManager extends BaseManager {
                 }
 
                 if (searchType === Constants.SEARCH_TYPE.Friend) {
-                    console.log('serach========')
                     return yield Friend.aggregate([
                         { $match: { userID } },
                         { $lookup: { from: 'users', localField: 'friendID', foreignField: '_id', as: 'friendID' } },

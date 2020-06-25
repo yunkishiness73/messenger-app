@@ -198,7 +198,9 @@ label:focus,
 .contactPanel .user-remove-contact,
 .contactPanel .user-remove-request-contact-sent,
 .contactPanel .user-approve-request-contact-received,
-.contactPanel .user-remove-request-contact-received {
+.contactPanel .user-remove-request-contact-received,
+.contactPanel .send-friend-requests
+ {
   box-sizing: border-box;
   display: inline-flex;
   flex-shrink: 0;

@@ -13,6 +13,7 @@ router.put('/:id', requireAuth, Upload.single('photo'), UserController.update);
 router.post('/forgotPassword', UserController.forgotPassword);
 router.get('/:id', requireAuth, UserController.getById);
 router.get('/me/conversations', requireAuth, UserController.getConversations);
+router.get('/', requireAuth, UserController.search);
 
 
 

@@ -113,6 +113,20 @@ UserController.prototype.getConversations = (req, res) => {
                 });
 }
 
+UserController.prototype.search = (req, res) => {
+    let currentUser = req.user;
+    let q = req.query['q'];
+ 
+    return new UserManager()
+                 .findUsersAreNotFriend({ userID: currentUser._id, q })
+                 .then(users => {
+                     return res.status(200).json({ data: users });
+                 })
+                 .catch(err => {
+                     return res.status(500).json({ error: err });
+                 });
+ }
+
 
 
 

@@ -343,6 +343,161 @@ function rejectFriendRequest() {
     })
 }
 
+function renderSearchResults(users) {
+    let userList = '';
+
+    users.forEach(user => {
+        userList += User(user);
+    })
+
+    return userList;
+}
+
+function User(user) {
+    let photo = '';
+
+    if (user.photo) {
+        photo = `${BASE_URL}/${user.photo}`.replace('uploads', '');
+    } else {
+        photo = 'https://img.icons8.com/material/4ac144/256/user-male.png';
+    }
+
+    return `<li class="_contactList" data-uid="${user._id}">
+                <div class="contactPanel">
+                    <div class="user-avatar">
+                        <img src="${photo}" alt="">
+                    </div>
+                    <div class="user-name">
+                        <p>
+                            ${user.username}
+                        </p>
+                    </div>
+                    <br>
+                    <div class="user-address">
+                        <span>&nbsp ${user.displayName}</span>
+                    </div>
+                    <div class="send-friend-requests" data-user='${JSON.stringify(user)}' data-uid="${user._id}">
+                       Kết bạn
+                    </div>
+                </div>
+            </li>`
+}
+
+function searchUsers() {
+    $('#input_find-users-contact').keyup(function (e) { 
+        if (e.keyCode === 13) {
+            let keyword = $.trim($(this).val());
+
+            if (!keyword) {
+                alertify.notify('Please input keyword. Ex: \'Kiet\'','e')
+                return false;
+            } 
+
+            $.ajax({
+                type: "GET",
+                url: `api/users?q=${keyword}`,
+                headers: {
+                    'Authorization': `Bearer ${baseService.token}`,
+                    'Content-Type': 'application/json'
+                },
+                dataType: "JSON",
+                success: function (data, textStatus, xhr) {
+                    if (xhr.status === 200 || xhr.status === 201) {
+                        let usersList = renderSearchResults(data['data']);
+
+                        $('.usersList').html('');
+                        $('.usersList').append(usersList);
+                    }
+                },
+                error: errorHandler.onError
+            })
+        }
+    });
+}
+
+function sendFriendRequests() {
+    $('body').on('click', '.send-friend-requests', function(e) {
+        e.preventDefault();
+
+        let _user = JSON.parse($(this).attr('data-user'));
+        let _receiverID = $(this).data('uid');
+
+        console.log(_user);
+
+
+        if (_receiverID) {
+            $.ajax({
+                type: "POST",
+                url: `api/friends/requests`,
+                headers: {
+                    'Authorization': `Bearer ${baseService.token}`,
+                    'Content-Type': 'application/json'
+                },
+                dataType: "JSON",
+                data: JSON.stringify({
+                    receiverID: _receiverID
+                }),
+                success: function (data, textStatus, xhr) {
+                    if (xhr.status === 200 || xhr.status === 201) {
+                        // $('.usersList').find("li[data-uid=" + _receiverID + "]").remove();
+
+                        let receiverID = data['data']['receiverID'];
+                        let senderID = data['data']['senderID'];
+
+                        // let friendRequest =  _FriendRequest({ ...data['data'], ..._user });
+                        // let contactsStr = $('.count-request-contact-sent > em').html('');
+                        // let contactsNum =  contactsStr ? 0 : parseInt(contactsStr);
+
+                        // let count_contacts = `
+                        //                     <span class="show-number-contacts count-request-contact-sent">
+                        //                         (<em>${(++contactsNum)}</em>)
+                        //                     </span>`;
+                        
+                        // $('.count-request-contact-sent').remove();
+                        // $('#link-request-contact-sent').append(count_contacts);
+
+                        // $('#request-contact-sent>.find-user-bottom>.contactList').append(friendRequest);
+
+                        emitAcceptFriendRequest([ receiverID , senderID ]);
+                    }
+                },
+                error: errorHandler.onError
+            })
+        }
+    })
+}
+
+function _FriendRequest(friend) {
+    let photo = '';
+
+    if (friend.photo) {
+        photo = `${BASE_URL}/${friend.photo}`.replace('uploads', '');
+    } else {
+        photo = 'https://img.icons8.com/material/4ac144/256/user-male.png';
+    }
+
+    return `
+            <li class="_contactList" data-uid="${friend._id}">
+                <div class="contactPanel">
+                    <div class="user-avatar">
+                        <img src="${photo}" alt="">
+                    </div>
+                    <div class="user-name">
+                        <p>
+                            ${friend.username}
+                        </p>
+                    </div>
+                    <br>
+                    <div class="user-address">
+                        <span>&nbsp ${friend.displayName}</span>
+                    </div>
+                    <div class="reject-friend-requests user-remove-request-contact-sent action-danger display-important" data-friend-request="${friend._id}" data-uid="${friend.receiverID}">
+                        Hủy yêu cầu
+                    </div>
+                </div>
+            </li>`;
+}
+
 $(function () {
     showUserInfo();
 
@@ -355,4 +510,8 @@ $(function () {
     acceptFriendRequest();
 
     rejectFriendRequest();
+    
+    searchUsers();
+
+    sendFriendRequests();
 });

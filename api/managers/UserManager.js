@@ -5,6 +5,9 @@ const EncryptionUtil = require('../helpers/EncryptionUtil');
 const co = require('co');
 const DateUtil = require('../helpers/DateUtil');
 const EmailService = require('../services/EmailService');
+const FriendManager = require('../managers/FriendManager');
+const _ = require('lodash');
+const Constants = require('../constants/Constants');
 
 class UserManager extends BaseManager {
     getModel() {
@@ -86,13 +89,49 @@ class UserManager extends BaseManager {
         return passwordArray.join('');
     }
 
+    findUsersAreNotFriend(options) {
+        let self = this;
+
+        return co(function* forgotPassword() { 
+            let { userID, q } = options;
+            let Model = self.getModel();
+
+            let friends = yield new FriendManager().search({ userID });
+            let friendIDs = _.map(friends, 'friendID._id');
+
+            friendIDs.push(userID);
+
+            let criteria = {
+                _id: { $nin: friendIDs },
+                status: Constants.USER_STATUS.Enabled
+            }
+
+            if (q) {
+                criteria = {
+                    ...criteria,
+                    $or: [ 
+                        { username : new RegExp(q, "gmi") },
+                        { displayName: new RegExp(q, "gmi") }
+                    ]
+                }
+            }
+
+            let entity = yield Model.find(criteria, '-isDeleted -password -createdAt -updatedAt -lastLoggedDate');
+
+            console.log(friendIDs);
+            console.log(friends);
+            console.log('======+========');
+            console.log(entity);
+
+            return entity;
+        });
+    }
+
     forgotPassword(username) {
         let self = this;
 
         return co(function* forgotPassword() {
            let entity = yield self.getModel().findOne({ username });
-
-           console.log(entity);
 
            if (!entity) return Promise.reject({ message: "Resource not found" });
 
