@@ -439,7 +439,7 @@ function sendFriendRequests() {
                 }),
                 success: function (data, textStatus, xhr) {
                     if (xhr.status === 200 || xhr.status === 201) {
-                        // $('.usersList').find("li[data-uid=" + _receiverID + "]").remove();
+                        $('.usersList').find("li[data-uid=" + _receiverID + "]").remove();
 
                         let receiverID = data['data']['receiverID'];
                         let senderID = data['data']['senderID'];

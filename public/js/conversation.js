@@ -27,12 +27,12 @@ function Conversation(conversation) {
     } else if (conversation.type === 'Single') {
         if (conversation.members[0]._id === userInfo._id) {
             conversationName = conversation.members[1].displayName || '';
-            imgURL = `${BASE_URL}/${conversation.members[0].photo}`.replace('uploads', '') || '';
+            imgURL = `${BASE_URL}/${conversation.members[1].photo}`.replace('uploads', '') || '';
             conversation['to'] = conversation.members[1]; 
             conversation['conversationName'] = conversationName;
         } else {
             conversationName = conversation.members[0].displayName || '';
-            imgURL = `${BASE_URL}/${conversation.members[1].photo}`.replace('uploads', '') || '';
+            imgURL = `${BASE_URL}/${conversation.members[0].photo}`.replace('uploads', '') || '';
             conversation['to'] = conversation.members[0];
             conversation['conversationName'] = conversationName;
         }
@@ -346,15 +346,25 @@ function Message(message) {
             creator = 'you';
         }
     }
-  
+
+    let photo = '';
+
+    if (message.senderID.photo) {
+        photo = `${BASE_URL}/${message.senderID.photo}`.replace('uploads', '');
+    } else {
+        photo = 'https://img.icons8.com/material/4ac144/256/user-male.png';
+    }
+
     if (message.type === "Text") {
-        return `<div class="convert-emoji bubble ${creator}" data-mess-id="${message._id}">
-             ${message.message}
+        return `<div title="${moment(message.createdAt).format('hh:mm')}" class="convert-emoji bubble ${creator}" data-mess-id="${message._id}">
+            <img src="${photo}" class="avatar-small" title="${message.senderID.displayName}">
+            ${message.message}
         </div>`;
     }
 
     if (message.type === "Image") {
-        return `<div class="bubble bubble-image-file ${creator}" data-mess-id="${message._id}">
+        return `<div title="${moment(message.createdAt).format('hh:mm')}" class="bubble bubble-image-file ${creator}" data-mess-id="${message._id}">
+            <img src="${photo}" class="avatar-small" title="${message.senderID.displayName}">
             <img src="${BASE_URL}/${message.attachment.fileName}" class="show-image-chat" />
         </div>`;
     }
@@ -365,8 +375,9 @@ function Message(message) {
         </div>`;
     }
 
-        return `<div class="bubble bubble-attachment-file ${creator}" data-mess-id="${message._id}">
+        return `<div title="${moment(message.createdAt).format('hh:mm')}" class="bubble bubble-attachment-file ${creator}" data-mess-id="${message._id}">
             <a href="${BASE_URL}/${message.attachment.fileName}" download="${message.attachment.fileName}">
+                <img src="${photo}" class="avatar-small" title="${message.senderID.displayName}">
                 ${message.attachment.fileName}
             </a>
         </div>`;

@@ -234,7 +234,7 @@ class FriendManager extends BaseManager {
           
             return yield Model.deleteMany({
                 $or: [
-                    { userID, friendID },
+                    { userID: userID, friendID: friendID },
                     { userID: friendID, friendID: userID }
                 ]
             });
