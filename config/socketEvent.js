@@ -34,6 +34,8 @@ module.exports = (io) => {
         });
 
         socket.on('private-message', payload => {
+            //socket.adapter.rooms
+
             const members = payload.members;
 
             if (members.length > 0) {
@@ -41,8 +43,6 @@ module.exports = (io) => {
                     io.in(m).emit('new-messages', payload.message);
                 })
             } else {
-                console.log(payload.message);
-                console.log(socket.adapter.rooms);
                 io.in(payload.message.conversation).emit('new-messages', payload.message);
             }
         });

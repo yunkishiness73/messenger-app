@@ -8,7 +8,7 @@ class MessageManager extends BaseManager {
     save(payload) {
         return co(function* save() {
             try {
-                let { conversationID, type, senderID, message, attachment } = payload;
+                let { currentUser, conversationID, type, senderID, message, attachment } = payload;
 
                 let messageEntity = new Message({
                     conversation: conversationID,
@@ -30,7 +30,21 @@ class MessageManager extends BaseManager {
                     return Promise.reject({ message: 'Update conversation failed' });
                 }
 
-                return savedEntity;
+                let savedEntityCopy = {
+                    ...savedEntity._doc,
+                    senderID: {
+                        _id: currentUser._id, 
+                        photo: currentUser.photo || '',
+                        firstName: currentUser.firstName,
+                        lastName: currentUser.lastName,
+                        displayName: currentUser.displayName,
+                        createdAt: currentUser.createdAt,
+                        updatedAt: currentUser.updatedAt,
+                        lastLoggedDate: currentUser.lastLoggedDate,
+                    }
+                };
+
+                return savedEntityCopy;
             } catch(err) {
                 return Promise.reject(err);
             }

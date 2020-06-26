@@ -189,7 +189,7 @@ function createGroupChat() {
             console.log('Sau khi Add user');
             console.log(members);
         } else {
-            alertify.warning('Warning notification message.', 7); 
+            alertify.success('This user is already in this conversation', 7); 
         }
     });
 

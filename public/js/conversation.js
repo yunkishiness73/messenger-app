@@ -428,34 +428,66 @@ function handleFileUploadEvent() {
         let conversationID = $(this).attr('data-chat');
         let file = $(this).prop('files')[0];
 
+        let fd = new FormData();
+
         if (file.size > maxSize) {
             alertify.notify('Image must less than 10MB', 'error', 7);
             return false;
         } else {
-            let fd = new FormData();
-                
-            fd.append('conversationID', conversationID);
-            fd.append('attachment', file);
+            if (conversationID) {
             
-            $.ajax({
-                url: '/api/messages/send',
-                method: 'POST',
-                data: fd,
-                processData: false,
-                contentType: false,
-                headers: {
-                    'Authorization': `Bearer ${baseService.token}`
-                },
-                success: function (data, textStatus, xhr) {
-                    if (xhr.status === 200 || xhr.status === 201) {
-                        emitNewPrivateMessage(data['data']);
+                fd.append('conversationID', conversationID);
+                fd.append('attachment', file);
+                
+                $.ajax({
+                    url: '/api/messages/send',
+                    method: 'POST',
+                    data: fd,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'Authorization': `Bearer ${baseService.token}`
+                    },
+                    success: function (data, textStatus, xhr) {
+                        if (xhr.status === 200 || xhr.status === 201) {
+                            emitNewPrivateMessage(data['data']);
+                        }
+                    },
+                    error: function (xhr, errorMessage) {
+                        alert(errorMessage);
                     }
-                },
-                error: function (xhr, errorMessage) {
-                    alert(errorMessage);
-                }
-            });
-        }    
+                });
+
+            } else {
+                let receiverID = $('.conversation-name').attr('data-receiverID');
+                let currentUser = JSON.parse(localStorage.getItem('userInfo'));
+                
+                fd.append('receiverID', receiverID);
+                fd.append('attachment', file);
+                fd.append('conversationType', 'Single');
+                
+                $.ajax({
+                    url: '/api/messages/send',
+                    method: 'POST',
+                    data: fd,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'Authorization': `Bearer ${baseService.token}`
+                    },
+                    success: function (data, textStatus, xhr) {
+                        if (xhr.status === 200 || xhr.status === 201) {
+                            $("[data-chat]").attr("data-chat", data['data'].conversation);
+
+                            emitNewPrivateMessage(data['data'], [receiverID, currentUser._id]);
+                        }
+                    },
+                    error: function (xhr, errorMessage) {
+                        alert(errorMessage);
+                    }
+                });
+            }
+        } 
      });
 }
 

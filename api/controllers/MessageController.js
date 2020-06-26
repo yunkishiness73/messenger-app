@@ -45,7 +45,8 @@ MessageController.prototype.create = (req, res) => {
                             message,
                             senderID: currentUser._id,
                             type: messageType,
-                            attachment
+                            attachment,
+                            currentUser
                         };
 
                        return new MessageManager().save(payload);
@@ -73,7 +74,7 @@ MessageController.prototype.create = (req, res) => {
                             } });
                        }
 
-                        return new MessageManager().save({ conversationID, type: messageType, senderID: currentUser._id, message, attachment })
+                        return new MessageManager().save({ currentUser, conversationID, type: messageType, senderID: currentUser._id, message, attachment })
                     })
                     .then(messageEntity => {
                         res.status(201).json({ data: messageEntity });
