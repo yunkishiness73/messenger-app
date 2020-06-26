@@ -23,6 +23,10 @@ const ConversationSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User" 
     }],
+    seenBy: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User" 
+    }],
     deletedBy: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User" 

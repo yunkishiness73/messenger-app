@@ -83,7 +83,7 @@ ConversationController.prototype.getById = (req, res) => {
         });
 }
 
-ConversationController.prototype.addMembers = (req, res) => {
+ConversationController.prototype.addMembers = (req, res, next) => {
     let { members } = req.body;
     let conversationID = req.params['id'];
     let currentUser = req.user;
@@ -110,12 +110,23 @@ ConversationController.prototype.addMembers = (req, res) => {
                 });
             }
 
+            if (!entity.admins.includes(currentUser._id) && members) {
+                // return res.status(403).json({
+                //     error: {
+                //         message: 'You must have admin role to add member from this conversation'
+                //     }
+                // });
+                console.log('do day nef')
+                Promise.reject({  message: 'You must have admin role to add member from this conversation'  })
+            }
+
             return new ConversationManager().update({ currentUser, members, conversation: entity });
         })
         .then(result => {
             return res.status(200).json({ data: result });
         })
         .catch(err => {
+            next()
             return res.status(500).json({ error: err });
         });
 
@@ -222,13 +233,13 @@ ConversationController.prototype.leave = (req, res, next) => {
                 });
             }
 
-            // if (!conversationEntity.admins.includes(currentUser._id) && members) {
-            //     return res.status(403).json({
-            //         error: {
-            //             message: 'You must have admin role to remove member from this conversation'
-            //         }
-            //     });
-            // }
+            if (!conversationEntity.admins.includes(currentUser._id) && members) {
+                return res.status(403).json({
+                    error: {
+                        message: 'You must have admin role to remove member from this conversation'
+                    }
+                });
+            }
 
             return new ConversationManager().leave({ currentUser, conversation: conversationEntity, members });
         })
@@ -245,8 +256,6 @@ ConversationController.prototype.search = (req, res, next) => {
 
     let members = m.split(',');
 
-    console.log(members, members.length);
-
     if (Array.isArray(members) && members.length > 0) {
         return new ConversationManager().getConversationByMembers({ members })
                                         .then(entity => {
@@ -261,6 +270,48 @@ ConversationController.prototype.search = (req, res, next) => {
         }})
     }
 }
+
+ConversationController.prototype.markSeen = (req, res, next) => {
+    let conversationID = req.params.id;
+    let currentUser = req.user;
+    
+    if (!conversationID) {
+        return res.status(400).json({ 
+            error: { 
+                message: 'Missing conversation ID' 
+            } 
+        });
+    }
+
+    return new ConversationManager()
+                .getById(conversationID)
+                .then(conversationEntity => {
+                    if (!conversationEntity) {
+                        return res.status(404).json({
+                            error: {
+                                message: 'Conversation not found'
+                            }
+                        });
+                    }
+
+                    if (!conversationEntity.members.includes(currentUser._id)) {
+                        return res.status(403).json({
+                            error: {
+                                message: 'Not allowed to mark seen this conversation'
+                            }
+                        });
+                    }
+
+                    return new ConversationManager().markSeen({ currentUser, conversation: conversationEntity })
+                })
+                .then(result => {
+                    return res.status(200).json({ data: result });
+                })
+                .catch(err => {
+                    return res.status(500).json({ error: err });
+                })
+}
+
 
 
 

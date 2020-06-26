@@ -150,7 +150,6 @@ function createGroupChat() {
 
         if (flag) {
             if (conversationID) {
-
                 errorHandler.checkTokenExisted();
                     
                 $.ajax({

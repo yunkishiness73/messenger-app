@@ -24,7 +24,11 @@ class MessageManager extends BaseManager {
                     return Promise.reject({ message: 'Save entity failed' });
                 }
 
-                let updatedConversation = yield Conversation.updateOne({ _id: conversationID }, { updatedAt: DateUtil.getNow(), lastMessage: savedEntity._id });
+                let updatedConversation = yield Conversation.updateOne({ _id: conversationID }, { 
+                    updatedAt: DateUtil.getNow(),
+                    seenBy: [currentUser._id],
+                    lastMessage: savedEntity._id 
+                });
 
                 if (!updatedConversation.nModified) {
                     return Promise.reject({ message: 'Update conversation failed' });

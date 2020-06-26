@@ -193,8 +193,9 @@ class ConversationManager extends BaseManager {
                     if (insertedMessage.length) {
                         conversation.lastMessage = insertedMessage[insertedMessage.length-1];
                         conversation.updatedAt = DateUtil.getNow();
+                        conversation.seenBy = [currentUser._id];
                     }
-             
+
                     return yield conversation.save();
                 }
 
@@ -203,6 +204,21 @@ class ConversationManager extends BaseManager {
         })
         .catch(err => {
             return Promise.reject(err);
+        });
+    }
+
+    markSeen(payload) {
+        const self = this;
+
+        return co(function* search() {
+            let Model = self.getModel();
+            const { currentUser, conversation } = payload;
+
+            if (conversation.seenBy.indexOf(currentUser._id) === -1) {
+                conversation.seenBy.push(currentUser._id);
+            }
+
+            return yield conversation.save();
         });
     }
 
@@ -281,6 +297,7 @@ class ConversationManager extends BaseManager {
                         if (insertedMessage.length) {
                             conversation.lastMessage = insertedMessage[insertedMessage.length-1];
                             conversation.updatedAt = DateUtil.getNow();
+                            conversation.seenBy = [currentUser._id];
                         }
                  
                         return yield conversation.save();
@@ -304,6 +321,7 @@ class ConversationManager extends BaseManager {
                     if (insertedMessage) {
                         conversation.lastMessage = insertedMessage;
                         conversation.updatedAt = DateUtil.getNow();
+                        conversation.seenBy = [currentUser._id];
                     }
 
                     return yield conversation.save();

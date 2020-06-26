@@ -106,15 +106,21 @@ function enableEmojioneArea(divId) {
         }
       },
       click: function() {
-        
+
         // //Bật lắng nghe dom cho việc chat tin nhắn văn bản emoji
         // textAndEmojiChat();
         // // Bật chức năng typing on
         // typingOn(divId);
       },
+      focus: function(editor, e) {
+        let conversationID = $('#write-chat').attr('data-chat');
+
+        markSeen(conversationID);
+      },
       blur: function () {
         // // Tắt chức năng typing on
         // typingOff(divId);
+
       },
     },
   });

@@ -40,7 +40,7 @@ function Conversation(conversation) {
 
     return `
         <a data-conversation='${JSON.stringify(conversation)}' href="#" class="room-chat" data-conversation-id="${conversation._id}">
-            <li class="person" data-chat="${conversation._id}">
+            <li hasSeen='${conversation.seenBy.indexOf(userInfo._id) === -1 ? 0 : 1 }' class="person ${conversation.seenBy.indexOf(userInfo._id) === -1 ? 'active' : ''}"  data-conversation-id="${conversation._id}">
                 <div class="left-avatar">
                     <div class="dot"></div>
                     <img src="${imgURL}" alt="">
@@ -65,12 +65,15 @@ function handleConversationClick() {
         //Show chat screen
         $('#screen-chat').show();
 
-
+        //Mark seen conversation
 
         // nineScrollRight();
 
         let conversationID = $(this).attr("data-conversation-id");
         let conversation = $(this).attr("data-conversation");
+
+        markSeen(conversationID);
+
 
         beforeFetchConversationMessage(JSON.parse(conversation));
 
@@ -491,6 +494,32 @@ function handleFileUploadEvent() {
      });
 }
 
+function markSeen(conversationID) {
+    let convElement = $('li.person[data-conversation-id='+ conversationID +']');
+    let hasSeen = parseInt(convElement.attr('hasSeen'));
+
+    if (!hasSeen) {
+      errorHandler.checkTokenExisted();
+
+      $.ajax({
+          type: "PUT",
+          url: `api/conversations/${conversationID}/markSeen`,
+          headers: {
+              'Authorization': `Bearer ${baseService.token}`,
+              'Content-Type': 'application/json'
+          },
+          dataType: "json",
+          success: function (data, textStatus, xhr) {
+              if (xhr.status === 200 || xhr.status === 201) {
+                convElement.attr('hasSeen', 1);
+                convElement.removeClass('active');
+              }
+          },
+          error: errorHandler.onError
+      })
+    }
+}
+
 $(function () {
     scrollToBottom();
     
@@ -501,6 +530,5 @@ $(function () {
     handleFileUploadEvent();
 
     fetchOlderMessage();
-
     // showGroupModal();
 });

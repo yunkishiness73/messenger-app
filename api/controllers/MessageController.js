@@ -84,23 +84,4 @@ MessageController.prototype.create = (req, res) => {
                     });
 }
 
-MessageController.prototype.markSeen = (req, res) => {
-    let id = req.params.id;
-    
-    if (!id) {
-        return res.status(400).json({ error: { message: 'Missing Message ID' } });
-    }
-
-    return new ConversationManager().update({
-        criteria: { _id: id },
-        doc: { hasSeen: true }
-     })
-    .then(result => {
-        return res.status(200).json({ data: result });
-    })
-    .catch(err => {
-        next(err);
-    });
-}
-
 module.exports = MessageController.prototype;
