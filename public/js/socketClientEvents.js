@@ -22,9 +22,10 @@ function listenGroupChatCreation() {
     });
 }
 
-function emitNewPrivateMessage(message) {
+function emitNewPrivateMessage(message, members=[]) {
     socket.emit('private-message', {
-        message
+        message,
+        members
     });
 }
 

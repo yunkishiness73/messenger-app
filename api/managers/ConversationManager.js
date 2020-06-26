@@ -22,6 +22,42 @@ class ConversationManager extends BaseManager {
         });
     }
 
+    getConversationByMembers(payload) {
+        const self = this;
+
+        return co(function* getConversationByMembers() {
+            const Model = self.getModel();
+            const { members } = payload;
+
+            let conversation = yield Model.find({ 
+                members: { 
+                    $all: members
+                },
+                type: Constants.CONVERSATION_TYPE.Single
+              })
+                .populate([
+                    {
+                        path: 'members',
+                        select: 'username displayName firstName lastName photo'
+                    },
+                    {
+                        path: 'lastMessage',
+                        select: '-isDeleted',
+                        populate: {
+                            path: 'senderID',
+                            select: 'username displayName firstName lastName'
+                        }
+                    }
+                ]);
+
+
+            return conversation;
+        })
+        .catch(err => {
+            Promise.reject(err);
+        });
+    }
+
     save(payload) {
         const self = this;
 
@@ -49,8 +85,9 @@ class ConversationManager extends BaseManager {
                     default:
                         let entity = yield Model.find({ 
                                                         members: { 
-                                                            $all: [senderID, receiverID]
-                                                        }
+                                                            $all: [senderID, receiverID],
+                                                        },
+                                                        type: Constants.CONVERSATION_TYPE.Single
                                                       })
                                                         .populate({
                                                             path: 'members',
@@ -64,7 +101,8 @@ class ConversationManager extends BaseManager {
                                 });
                             } else {
                                 return Promise.reject({
-                                    message: 'Conversation already existed'
+                                    message: 'Conversation already existed',
+                                    data: entity
                                 });
                             }
                         break;
@@ -102,7 +140,8 @@ class ConversationManager extends BaseManager {
 
                         return yield savedEntity.save();
                     }
-                }
+                } else if (savedEntity && type === Constants.CONVERSATION_TYPE.Single) return savedEntity;
+                
 
                 return Promise.reject({ message: 'Save entity failed' });
             } catch(err) {

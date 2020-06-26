@@ -45,10 +45,10 @@ function FriendItem(friend) {
             <div class="user-address">
                 <span>&nbsp ${friend.displayName}</span>
             </div>
-            <div class="user-talk" data-uid="${friend._id}">
+            <div class="user-talk" data-friend='${JSON.stringify(friend)}' data-uid="${friend._id}">
                 Trò chuyện
             </div>
-            <div class="user-remove-contact action-danger" data-uid="${friend._id}">
+            <div class="user-remove-contact action-danger" data-friend='${JSON.stringify(friend)}' data-uid="${friend._id}">
                 Xóa liên hệ
             </div>
         </div>
@@ -426,6 +426,8 @@ function sendFriendRequests() {
 
 
         if (_receiverID) {
+            errorHandler.checkTokenExisted();
+
             $.ajax({
                 type: "POST",
                 url: `api/friends/requests`,
@@ -498,6 +500,65 @@ function _FriendRequest(friend) {
             </li>`;
 }
 
+function talk() {
+    $('body').on('click', '.user-talk', function(e) {
+        e.preventDefault();
+
+        let currentUser = JSON.parse(localStorage.getItem('userInfo'));
+        let receiverID = $(this).data('uid');
+        let friend =  JSON.parse($(this).attr('data-friend'));
+
+        console.log(friend);
+
+        if (currentUser._id && receiverID) {
+            errorHandler.checkTokenExisted();
+
+            $.ajax({
+                type: "GET",
+                url: `api/conversations?m=${currentUser._id + ',' + receiverID}`,
+                headers: {
+                    'Authorization': `Bearer ${baseService.token}`,
+                    'Content-Type': 'application/json'
+                },
+                dataType: "JSON",
+                success: function (data, textStatus, xhr) {
+                    if (xhr.status === 200 || xhr.status === 201) {
+                        $('#screen-chat').show();
+                        $("#contactsModal").modal('toggle');
+                
+                        if (data['data'].length) {
+                            let conversation = data['data'][0];
+
+                            conversation['to'] = friend; 
+                            conversation['conversationName'] = friend['displayName'];
+
+                            beforeFetchConversationMessage(conversation);
+                        } else {
+                            $('.conversation-name').html(friend['displayName']);
+                            $('.show-member-tab').hide();
+
+                            $("[data-chat]").attr("data-chat", '');
+                            $('.conversation-name').html(friend['displayName']);
+                            $('.conversation-name').attr('data-receiverID', receiverID);
+                         
+                            $('.pageIndex').attr('data-hasMessage', 1);
+                            $('.pageIndex').attr('data-currentPage', 1);
+                            $('.pageIndex').hide();
+
+                            $('.chat').html('');
+                            $('.all-images').html('');
+                            $('.list-attachments').html('');
+
+                            configAttachmentsModal();
+                        }   
+                    }
+                },
+                error: errorHandler.onError
+            })
+        }
+    })
+}
+
 $(function () {
     showUserInfo();
 
@@ -514,4 +575,6 @@ $(function () {
     searchUsers();
 
     sendFriendRequests();
+
+    talk();
 });

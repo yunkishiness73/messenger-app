@@ -14,6 +14,7 @@ router.get('/:id/messages', requireAuth, ConversationController.getMessages);
 router.post('/:id/leave', requireAuth, ConversationController.leave);
 router.delete('/:id', requireAuth, ConversationController.delete);
 router.put('/:id', requireAuth, ConversationController.update);
+router.get('/', requireAuth, ConversationController.search);
 
 
 module.exports = router;

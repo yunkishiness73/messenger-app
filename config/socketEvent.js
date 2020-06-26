@@ -34,9 +34,17 @@ module.exports = (io) => {
         });
 
         socket.on('private-message', payload => {
-            console.log(payload.message);
-            console.log(socket.adapter.rooms);
-            io.in(payload.message.conversation).emit('new-messages', payload.message);
+            const members = payload.members;
+
+            if (members.length > 0) {
+                members.forEach(m => {
+                    io.in(m).emit('new-messages', payload.message);
+                })
+            } else {
+                console.log(payload.message);
+                console.log(socket.adapter.rooms);
+                io.in(payload.message.conversation).emit('new-messages', payload.message);
+            }
         });
 
         /* SOCKET FOR FRIEND REQUEST */

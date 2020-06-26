@@ -90,7 +90,7 @@ function beforeFetchConversationMessage(conversation) {
     fetchConversationMessage({conversationID: conversation._id });
 }
 
-function configAttachmentsModal(conversationID) {
+function configAttachmentsModal(conversationID='') {
     //Config image modal
     $('.imagesModal').attr('id', `imagesModal_${conversationID}`);
     $('.show-images').attr('href', `#imagesModal_${conversationID}`);
@@ -226,7 +226,7 @@ function fetchOlderMessage() {
         let pageIndex = parseInt($('.pageIndex').attr('data-currentPage'));
         let hasMessage = parseInt($('.pageIndex').attr('data-hasMessage'));
         
-        if (hasMessage) {
+        if (hasMessage && conversationID) {
             $('.pageIndex').attr('data-currentPage', ++pageIndex);
     
             fetchConversationMessage({

@@ -93,32 +93,32 @@ ConversationController.prototype.addMembers = (req, res) => {
     }
 
     return new ConversationManager().getById(conversationID)
-            .then(entity => {
-                if (entity == null) {
-                    return res.status(404).json({
-                        error: {
-                            message: 'Conversation not found'
-                        }
-                    });
-                }
+        .then(entity => {
+            if (entity == null) {
+                return res.status(404).json({
+                    error: {
+                        message: 'Conversation not found'
+                    }
+                });
+            }
 
-                if (!entity.members.includes(currentUser._id)) {
-                    return res.status(403).json({
-                        error: {
-                            message: 'Not have permission to perform action on this conversation'
-                        }
-                    });
-                }
+            if (!entity.members.includes(currentUser._id)) {
+                return res.status(403).json({
+                    error: {
+                        message: 'Not have permission to perform action on this conversation'
+                    }
+                });
+            }
 
-               return new ConversationManager().update({ currentUser, members, conversation: entity });
-            })
-            .then(result => {
-                return res.status(200).json({ data: result });
-            })
-            .catch(err => {
-                return res.status(500).json({ error: err });
-            });
-    
+            return new ConversationManager().update({ currentUser, members, conversation: entity });
+        })
+        .then(result => {
+            return res.status(200).json({ data: result });
+        })
+        .catch(err => {
+            return res.status(500).json({ error: err });
+        });
+
 }
 
 ConversationController.prototype.delete = (req, res) => {
@@ -130,32 +130,32 @@ ConversationController.prototype.delete = (req, res) => {
     }
 
     return new ConversationManager().getById(conversationID)
-            .then(entity => {
-                if (entity == null) {
-                    return res.status(404).json({
-                        error: {
-                            message: 'Conversation not found'
-                        }
-                    });
-                }
+        .then(entity => {
+            if (entity == null) {
+                return res.status(404).json({
+                    error: {
+                        message: 'Conversation not found'
+                    }
+                });
+            }
 
-                if (!entity.members.includes(currentUser._id)) {
-                    return res.status(403).json({
-                        error: {
-                            message: 'Not allowed to delete this conversation'
-                        }
-                    });
-                }
+            if (!entity.members.includes(currentUser._id)) {
+                return res.status(403).json({
+                    error: {
+                        message: 'Not allowed to delete this conversation'
+                    }
+                });
+            }
 
-                return new ConversationManager().delete({ conversation: entity, currentUser });
-            })
-            .then(result => {
-                if (result)
-                    return res.status(200).json({ message: 'Deleted conversation successfully' });
-            })
-            .catch(err => {
+            return new ConversationManager().delete({ conversation: entity, currentUser });
+        })
+        .then(result => {
+            if (result)
+                return res.status(200).json({ message: 'Deleted conversation successfully' });
+        })
+        .catch(err => {
             return res.status(500).json({ error: err });
-            });
+        });
 }
 
 ConversationController.prototype.getMessages = (req, res, next) => {
@@ -196,9 +196,9 @@ ConversationController.prototype.getMessages = (req, res, next) => {
             return new MessageManager().getMessagesByConversationID(conversationID, { pageIndex, pageSize });
         })
         .then(messages => {
-           return res.status(200).json({
-               data: messages
-           });
+            return res.status(200).json({
+                data: messages
+            });
         })
         .catch(err => {
             next(err);
@@ -212,32 +212,56 @@ ConversationController.prototype.leave = (req, res, next) => {
     let { members } = req.body;
 
     return new ConversationManager()
-            .getById(conversationID)
-            .then(conversationEntity => {
-                if (!conversationEntity) {
-                    return res.status(404).json({
-                        error: {
-                            message: 'Conversation not found'
-                        }
-                    });
-                }
+        .getById(conversationID)
+        .then(conversationEntity => {
+            if (!conversationEntity) {
+                return res.status(404).json({
+                    error: {
+                        message: 'Conversation not found'
+                    }
+                });
+            }
 
-                // if (!conversationEntity.admins.includes(currentUser._id) && members) {
-                //     return res.status(403).json({
-                //         error: {
-                //             message: 'You must have admin role to remove member from this conversation'
-                //         }
-                //     });
-                // }
+            // if (!conversationEntity.admins.includes(currentUser._id) && members) {
+            //     return res.status(403).json({
+            //         error: {
+            //             message: 'You must have admin role to remove member from this conversation'
+            //         }
+            //     });
+            // }
 
-                return new ConversationManager().leave({ currentUser, conversation: conversationEntity, members });
-            })
-            .then(result => {
-                return res.status(200).json({ data: result });
-            })
-            .catch(err => {
-                return res.status(500).json({ error: err });
-            })
+            return new ConversationManager().leave({ currentUser, conversation: conversationEntity, members });
+        })
+        .then(result => {
+            return res.status(200).json({ data: result });
+        })
+        .catch(err => {
+            return res.status(500).json({ error: err });
+        })
 }
+
+ConversationController.prototype.search = (req, res, next) => {
+    let { m } = req.query;
+
+    let members = m.split(',');
+
+    console.log(members, members.length);
+
+    if (Array.isArray(members) && members.length > 0) {
+        return new ConversationManager().getConversationByMembers({ members })
+                                        .then(entity => {
+                                            res.status(200).json({ data: entity });
+                                        })
+                                        .catch(err => {
+                                            res.status(500).json({ error: err });
+                                        })
+    } else {
+        return res.status(401).json({ error: { 
+            message: 'Missing Members'
+        }})
+    }
+}
+
+
 
 module.exports = ConversationController.prototype;

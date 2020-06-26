@@ -39,10 +39,16 @@ function enableEmojioneArea(divId) {
       
         //If button Enter is press then send message to server
         if (e.keyCode == 13) {
+          errorHandler.checkTokenExisted();
+        
           let conversationID = $('#write-chat').attr('data-chat');
           let message = $.trim($('#write-chat').val());
          
-          if (message) {
+          if (!message) {
+            return false;
+          }
+
+          if (conversationID) {
             $.ajax({
                 type: "POST",
                 url: `api/messages/send`,
@@ -65,6 +71,33 @@ function enableEmojioneArea(divId) {
                       // appendToMessageList(data['data']);
 
                       emitNewPrivateMessage(data['data']);
+                    }
+                },
+                error: errorHandler.onError
+            })
+          } else {              
+              let receiverID = $('.conversation-name').attr('data-receiverID');
+              let currentUser = JSON.parse(localStorage.getItem('userInfo'));
+
+              $.ajax({
+                type: "POST",
+                url: `api/messages/send`,
+                headers: {
+                    'Authorization': `Bearer ${baseService.token}`,
+                    'Content-Type': 'application/json'
+                },
+                data:  JSON.stringify({
+                    receiverID: receiverID,
+                    message: message,
+                    conversationType: 'Single'
+                }),
+                dataType: "json",
+                success: function (data, textStatus, xhr) {
+                    if (xhr.status === 200 || xhr.status === 201) {
+                      $('.emojionearea-editor').html('');
+                      $("[data-chat]").attr("data-chat", data['data'].conversation);
+
+                      emitNewPrivateMessage(data['data'], [receiverID, currentUser._id]);
                     }
                 },
                 error: errorHandler.onError
