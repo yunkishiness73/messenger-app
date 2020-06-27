@@ -38,10 +38,9 @@ ConversationController.prototype.update = (req, res, next) => {
             }
 
             if (!entity.members.includes(currentUser._id) || !entity.admins.includes(currentUser._id)) {
-                return res.status(403).json({
-                    error: {
-                        message: 'Not have permission to perform action on this conversation'
-                    }
+                return Promise.reject({ 
+                    message: 'Not have permission to perform action on this conversation',
+                    status: 403
                 });
             }
 

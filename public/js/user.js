@@ -227,30 +227,30 @@ function renderIncommingFriendRequest(friends) {
 function IncommingFriendRequest(friend) {
     let photo = '';
 
-    if (friend.receiverID.photo) {
-        photo = `${BASE_URL}/${friend.receiverID.photo}`.replace('uploads', '');
+    if (friend.senderID.photo) {
+        photo = `${BASE_URL}/${friend.senderID.photo}`.replace('uploads', '');
     } else {
         photo = 'https://img.icons8.com/material/4ac144/256/user-male.png';
     }
 
-    return `<li class="_contactList" data-uid="${friend.receiverID._id}">
+    return `<li class="_contactList" data-uid="${friend.senderID._id}">
                 <div class="contactPanel">
                     <div class="user-avatar">
                         <img src="${photo}" alt="">
                     </div>
                     <div class="user-name">
                         <p>
-                            ${friend.receiverID.username}
+                            ${friend.senderID.username}
                         </p>
                     </div>
                     <br>
                     <div class="user-address">
-                        <span>&nbsp ${friend.receiverID.displayName}</span>
+                        <span>&nbsp ${friend.senderID.displayName}</span>
                     </div>
-                    <div class="user-approve-request-contact-received" data-friend-request="${friend._id}" data-uid="${friend.receiverID._id}">
+                    <div class="user-approve-request-contact-received" data-friend-request="${friend._id}" data-uid="${friend.senderID._id}">
                         Chấp nhận
                     </div>
-                    <div class="reject-friend-requests user-remove-request-contact-received action-danger" data-friend-request="${friend._id}" data-uid="${friend.receiverID._id}">
+                    <div class="reject-friend-requests user-remove-request-contact-received action-danger" data-friend-request="${friend._id}" data-uid="${friend.senderID._id}">
                         Từ chối
                     </div>
                 </div>

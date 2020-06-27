@@ -61,6 +61,8 @@ class FriendManager extends BaseManager {
 
                 if (friendRequest.status === Constants.FRIEND_REQUEST_STATUS.Rejected) {
                     friendRequest.status = Constants.FRIEND_REQUEST_STATUS.Pending;
+                    friendRequest.senderID = senderID;
+                    friendRequest.receiverID = receiverID;
 
                     return yield friendRequest.save();
                 } else if (friendRequest.status === Constants.FRIEND_REQUEST_STATUS.Accepted) {

@@ -38,6 +38,10 @@ function Conversation(conversation) {
         }
     }
 
+    let lastMessage = conversation.lastMessage ? conversation.lastMessage.message : '';
+
+    delete conversation['lastMessage'];
+
     return `
         <a data-conversation='${JSON.stringify(conversation)}' href="#" class="room-chat" data-conversation-id="${conversation._id}">
             <li hasSeen='${conversation.seenBy.indexOf(userInfo._id) === -1 ? 0 : 1 }' class="person ${conversation.seenBy.indexOf(userInfo._id) === -1 ? 'active' : ''}"  data-conversation-id="${conversation._id}">
@@ -52,7 +56,7 @@ function Conversation(conversation) {
                     ${moment(conversation.updatedAt).locale("vi").startOf("seconds").fromNow()}
                 </span>
                 <span class="preview convert-emoji">
-                   ${ conversation.lastMessage ? conversation.lastMessage.message : ''}
+                   ${ lastMessage }
                 </span>
             </li>
         </a>`;
