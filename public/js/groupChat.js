@@ -34,6 +34,47 @@ function searchFriends() {
 function createGroupChat() {
     let members = [];
 
+    $('#input-name-group-chat').keyup(function (e) {
+        e.preventDefault();
+
+        if (e.keyCode === 13) {
+            let title = $.trim($(this).val());
+            let conversationID =  $('#btn-create-group-chat').attr('data-conversationID');
+
+            if (!title) {
+                alertify.notify('Please input conversation name', 'error', 7);
+                return false;
+            }
+
+            if (!conversationID) {
+                return false;
+            }
+
+            $.ajax({
+                type: "PUT",
+                url: `api/conversations/${conversationID}`,
+                headers: {
+                    'Authorization': `Bearer ${baseService.token}`,
+                    'Content-Type': 'application/json'
+                },
+                dataType: "JSON",
+                data: JSON.stringify({
+                    title: title
+                }),
+                success: function (data, textStatus, xhr) {
+                    if (xhr.status === 200 || xhr.status === 201) {
+                        $('#groupChatModal').modal('toggle');
+                        fetchConversations();
+                        emitGroupChatCreation(data['data']);
+                    }
+                },
+                error: errorHandler.onError
+            })
+    
+          
+        }
+    });
+
     $('body').on('click', '.leave-group', function(e) {
         let conversationID =  $('#btn-create-group-chat').attr('data-conversationID');
 
@@ -125,6 +166,7 @@ function createGroupChat() {
         $("#friends-added").html('');
         $("#friends-added").append(friendsList);
         $("#groupChatModal .list-user-added").show();
+        $('#action-create-name-chat > button').hide();
         $('#input-name-group-chat').val(conversation.title);
 
         console.log(conversation);
@@ -167,6 +209,8 @@ function createGroupChat() {
                     }),
                     success: function (data, textStatus, xhr) {
                         if (xhr.status === 200 || xhr.status === 201) {
+                            members.push(friendObj);
+
                             $("#friends-added").append(friend);
                             $("#group-chat-friends").find("div[data-uid=" + uid + "]").remove();
 
@@ -193,6 +237,8 @@ function createGroupChat() {
     });
 
     $('body').on('click', '.create-group-chat', function(e) {
+        members = [];
+
         $('#input-name-group-chat').val('')
         $('#group-chat-friends').html('');
         $("#friends-added").html('');
@@ -237,7 +283,11 @@ function createGroupChat() {
                         return member._id !== uid;
                     });
 
-                       
+                    emitRemoveUserEvent({
+                        memberID: member._id,
+                        conversationID: data['data']['_id']
+                    });
+
                     console.log('after remove: ');
                     console.log(members);
                  }

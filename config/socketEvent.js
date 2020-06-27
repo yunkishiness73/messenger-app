@@ -15,6 +15,10 @@ module.exports = (io) => {
             console.log(payload);
         });
 
+        socket.on('notify-to-removed-user', payload => {
+            io.in(payload.memberID).emit('removed-user-event', payload);
+        });
+
         socket.on('group-chat-creation', payload => {
             let conversation = payload.conversation;
 

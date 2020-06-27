@@ -35,6 +35,10 @@ function emitAcceptFriendRequest(users) {
     });
 }
 
+function emitRemoveUserEvent(payload) {
+    socket.emit('notify-to-removed-user', payload);
+}
+
 socket.on('new-messages', message => {
     //Reload conversation to get newest message
     fetchConversations();
@@ -66,6 +70,17 @@ socket.on('new-group-creation', conversation => {
         fetchConversations();
     }
 });
+
+socket.on('removed-user-event', payload => {
+    let currentConv = $('.right').attr('data-chat');
+
+    if (currentConv && currentConv === payload.conversationID) {
+        $('#screen-chat').hide();
+        fetchConversations();
+    } else {
+        fetchConversations();
+    }
+})
 
 socket.on('notify-accept-friend-request', payload => {
     fetchFriendsList();

@@ -20,7 +20,7 @@ ConversationController.prototype.create = (req, res, next) => {
 
 ConversationController.prototype.update = (req, res, next) => {
     let id = req.params.id;
-    let { title } = req.body;
+    let { title, members } = req.body;
     let currentUser = req.user;
 
     if (!id) {
@@ -37,18 +37,10 @@ ConversationController.prototype.update = (req, res, next) => {
                 });
             }
 
-            if (!entity.members.includes(currentUser._id)) {
+            if (!entity.members.includes(currentUser._id) || !entity.admins.includes(currentUser._id)) {
                 return res.status(403).json({
                     error: {
                         message: 'Not have permission to perform action on this conversation'
-                    }
-                });
-            }
-
-            if (!conversationEntity.admins.includes(currentUser._id) && members) {
-                return res.status(403).json({
-                    error: {
-                        message: 'You must have admin role to remove member from this conversation'
                     }
                 });
             }
@@ -111,22 +103,15 @@ ConversationController.prototype.addMembers = (req, res, next) => {
             }
 
             if (!entity.admins.includes(currentUser._id) && members) {
-                // return res.status(403).json({
-                //     error: {
-                //         message: 'You must have admin role to add member from this conversation'
-                //     }
-                // });
-                console.log('do day nef')
-                Promise.reject({  message: 'You must have admin role to add member from this conversation'  })
+                return Promise.reject({  message: 'You must have admin role to add member from this conversation'  });
             }
-
+            
             return new ConversationManager().update({ currentUser, members, conversation: entity });
         })
         .then(result => {
             return res.status(200).json({ data: result });
         })
         .catch(err => {
-            next()
             return res.status(500).json({ error: err });
         });
 
