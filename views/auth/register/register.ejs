@@ -3,10 +3,21 @@
         <div class="form">
             <form method="post" html="{:multipart=>true}" data-remote="true" action="/register" accept-charset="UTF-8">
                 <input id="email" class="form-control" type="text" placeholder="Email" name="email" required>
-                &nbsp;<label class="radio-inline"><input type="radio" name="gender" value="male" checked required> Nam</label>&nbsp;
-                &nbsp;<label class="radio-inline"><input type="radio" name="gender" value="female" required> Nữ</label>&nbsp;
+                <p style="color: #e74c3c" class="email-helper"></p>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <input id="firstName" class="form-control" type="text" placeholder="First Name" name="email" required>
+                        <p style="color: #e74c3c" class="firstName-helper"></p>
+                    </div>
+                    <div class="col-sm-6">
+                        <input id="lastName" class="form-control" type="text" placeholder="Last Name" name="email" required>
+                        <p style="color: #e74c3c" class="lastName-helper"></p>
+                    </div>
+                </div>
                 <input id="password" class="form-control" type="password" placeholder="Password" name="password" required>
+                <p style="color: #e74c3c" class="password-helper"></p>
                 <input id="password_confirmation" class="form-control" type="password" placeholder="Repeat Password" name="password_confirmation" required>
+                <p style="color: #e74c3c" class="confPassword-helper"></p>
                 <input class="btn btn-default btn-register" type="submit" value="Tạo tài khoản" name="commit">
             </form>
         </div>

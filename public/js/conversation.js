@@ -438,7 +438,7 @@ function handleFileUploadEvent() {
         let fd = new FormData();
 
         if (file.size > maxSize) {
-            alertify.notify('Image must less than 10MB', 'error', 7);
+            alertify.notify('File must less than 10MB', 'error', 7);
             return false;
         } else {
             if (conversationID) {

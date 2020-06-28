@@ -24,15 +24,30 @@ class UserManager extends BaseManager {
         return co(function* beforeSave() {
             const existedUser = yield self.findByUsername(originalEntity.username);
 
-            if (existedUser) {
+            if (!existedUser) {
+                originalEntity.password = EncryptionUtil.hashSync(originalEntity.password);
+    
+                return Promise.resolve(originalEntity);
+            }
+        
+            if (existedUser.status === Constants.USER_STATUS.Pending) {
+                // existedUser.password = originalEntity.password;
+                // existedUser.firstName = originalEntity.firstName;
+                // existedUser.lastName = originalEntity.lastName;
+                // existedUser.displayName = 
+
+                // let saveEntity = yield existedUser.save();
+
+                self.generateTokenAndSendMail(originalEntity);
+
                 return Promise.reject({ 
-                    message: 'Username already taken'
+                    message: `This account was created but has not been activated. Check email ${existedUser.username} to activate!`
                 });
             }
-    
-            originalEntity.password = EncryptionUtil.hashSync(originalEntity.password);
-    
-            return Promise.resolve(originalEntity);
+
+            return Promise.reject({ 
+                message: 'Email already taken'
+            });
         });
     }
 

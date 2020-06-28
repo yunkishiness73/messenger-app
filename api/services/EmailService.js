@@ -19,12 +19,14 @@ class EmailService {
         const mailOptions = {
             from: process.env.EMAIL_USER_NAME,
             to: `${options.to}`,
-            subject: '[MESSENGER-APP] Verify your account',
-            html: `<b>Click this link to verify your account ${url} . This link will expire in next 5 minutes </b>`
+            subject: '[MESSENGER-APP] Activate your account',
+            html: `<b>Click this <a href="${url}">link</a>  to activate your account. This <a href="${url}">link</a> will expire in next 5 minutes </b>`
         }
 
         this.sendEmail(mailOptions);
     }
+
+    
 
     sendResetPassword(options) {
         const mailOptions = {
