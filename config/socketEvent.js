@@ -12,7 +12,6 @@ module.exports = (io) => {
         });
 
         socket.on('notifyUserIsActive', payload => {
-            console.log(payload);
         });
 
         socket.on('notify-to-removed-user', payload => {
@@ -21,9 +20,7 @@ module.exports = (io) => {
 
         socket.on('group-chat-creation', payload => {
             let conversation = payload.conversation;
-
-            console.log(conversation);
-
+            
             conversation.members.forEach(m => {
                 io.in(m).emit('new-group-creation', conversation);
             });

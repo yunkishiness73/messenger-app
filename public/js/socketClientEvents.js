@@ -59,8 +59,6 @@ socket.on('new-group-creation', conversation => {
 
     if (currentConv && currentConv === conversation._id) {
        refetchConversations().then(() => {
-        console.log('conversation in pm')   ;
-        console.log(conversation);
             beforeFetchConversationMessage(conversation);
         })
         .catch(err => {

@@ -29,9 +29,6 @@ class FriendManager extends BaseManager {
                 ]
             });
 
-            console.log('--------+---------');
-            console.log(entity);
-
             if (Array.isArray(entity) && entity.length === 0) {
                 const friendRequest = new FriendRequest({
                     senderID,

@@ -2,17 +2,29 @@ let API_URL = 'http://localhost:1337/api/users/me/conversations';
 const BASE_URL = 'http://localhost:1337';
 
 function renderConversation(conversations) {
+    let groupChats = '', userChats = '';
     let conversationList = ``;
     let conversationIDs = [];
 
     conversations.forEach(conversation => {
-        conversationIDs.push(conversation._id);
+        if (conversation.type === 'Group') {
+            groupChats += Conversation(conversation);
+        } else if (conversation.type === 'Single') {
+            userChats += Conversation(conversation);
+        }
+
         conversationList += Conversation(conversation);
+
+        conversationIDs.push(conversation._id);
     });
 
     sendConversationsList(conversationIDs);
 
-    return conversationList;
+    return {
+        allChats: conversationList,
+        groupChats: groupChats,
+        userChats: userChats
+    };
 }
 
 function Conversation(conversation) {
@@ -40,10 +52,12 @@ function Conversation(conversation) {
 
     let lastMessage = conversation.lastMessage ? conversation.lastMessage.message : '';
 
-    delete conversation['lastMessage'];
+    let _conversation = _.cloneDeep(conversation);
+
+    delete _conversation['lastMessage'];
 
     return `
-        <a data-conversation='${JSON.stringify(conversation)}' href="#" class="room-chat" data-conversation-id="${conversation._id}">
+        <a data-conversation='${JSON.stringify(_conversation)}' href="#" class="room-chat" data-conversation-id="${conversation._id}">
             <li hasSeen='${conversation.seenBy.indexOf(userInfo._id) === -1 ? 0 : 1 }' class="person ${conversation.seenBy.indexOf(userInfo._id) === -1 ? 'active' : ''}"  data-conversation-id="${conversation._id}">
                 <div class="left-avatar">
                     <div class="dot"></div>
@@ -108,8 +122,6 @@ function configAttachmentsModal(conversationID='') {
 }
 
 function showConversationInfo(conversation, originalEntity) {
-    console.log('show conversation info');
-    console.log(originalEntity);
    $("[data-chat]").attr("data-chat", conversation._id);
    $('.conversation-name').html(conversation.conversationName);
 
@@ -118,10 +130,6 @@ function showConversationInfo(conversation, originalEntity) {
 
    if (conversation.type === 'Group') {
         let currentConv = $(`.people>a[data-conversation-id=${conversation._id}]`).attr('data-conversation');
-
-        console.log('Curreent conv');
-        console.log(currentConv);
-
 
         $('.show-member-tab').show();
         $('.show-number-members').html(conversation.members.length);
@@ -153,10 +161,12 @@ function fetchConversations() {
         dataType: "JSON",
         success: function (data, textStatus, xhr) {
             if (xhr.status === 200) {
-                let conversations = renderConversation(data['data']);
+                let { allChats, groupChats, userChats } = renderConversation(data['data']);
 
                 $('.people').html('');
-                $('.people').append(conversations);
+                $('#all-chat > .people').append(allChats);
+                $('#user-chat > .people').append(userChats);
+                $('#group-chat > .people').append(groupChats);
             }
         },
         error: errorHandler.onError
@@ -177,10 +187,12 @@ function refetchConversations() {
             dataType: "JSON",
             success: function (data, textStatus, xhr) {
                 if (xhr.status === 200) {
-                    let conversations = renderConversation(data['data']);
+                    let { allChats, groupChats, userChats } = renderConversation(data['data']);
 
                     $('.people').html('');
-                    $('.people').append(conversations);
+                    $('#all-chat > .people').append(allChats);
+                    $('#user-chat > .people').append(userChats);
+                    $('#group-chat > .people').append(groupChats);
 
                     resolve(data['data']);
                 }
@@ -218,9 +230,6 @@ function fetchConversationMessage(payload) {
 
 function fetchOlderMessage() {
     $('.chat').scroll(function(e) {
-        console.log('before: ' +  $('.chat').scrollTop())
-        console.log('heihgt: ' +  $('.chat').height())
-        console.log('scroll height: ' +  $('.chat').prop('scrollHeight'))
         if ($(".chat").scrollTop() <= 30) {
             $('.pageIndex').css('display', 'block');
         } else {
@@ -390,45 +399,6 @@ function Message(message) {
         </div>`;
 }
 
-// function newMessage() {
-//     errorHandler.checkTokenExisted();
-
-//     $('.write-chat').keypress(function(e) {
-//         if (e.keyCode == 13) {
-//             alert('here')
-//             let conversationID = $(this).attr('data-chat');
-//             let message = $.trim($(this).val());
-           
-//             if (message) {
-//                 $.ajax({
-//                     type: "POST",
-//                     url: `api/messages/send`,
-//                     headers: {
-//                         'Authorization': `Bearer ${baseService.token}`,
-//                         'Content-Type': 'application/json'
-//                     },
-//                     data:  JSON.stringify({
-//                         conversationID: conversationID,
-//                         messageType: 'Text',
-//                         message: message
-//                     }),
-//                     dataType: "json",
-//                     success: function (data, textStatus, xhr) {
-//                         if (xhr.status === 200 || xhr.status === 201) {
-//                         //Reload conversation to get newest message
-//                           fetchConversations();
-                          
-//                           $('.write-chat').val('');
-//                           appendToMessageList(data['data']);
-//                         }
-//                     },
-//                     error: errorHandler.onError
-//                 })
-//             }
-//         }
-//     })
-// }
-
 function handleFileUploadEvent() {
     $(".attachment-chat").on('change', function () {
         let maxSize = 10*1000*1000;
@@ -524,6 +494,19 @@ function markSeen(conversationID) {
     }
 }
 
+function changeTypeChat() {
+    $("#select-type-chat").bind("change", function(){
+        let optionSelected = $("option:selected", this);
+        optionSelected.tab("show");
+
+        if ($(this).val() === "user-chat") {
+        $(".create-group-chat").hide();
+        } else {
+        $(".create-group-chat").show();
+        }
+    });
+  }
+
 $(function () {
     scrollToBottom();
     
@@ -534,5 +517,6 @@ $(function () {
     handleFileUploadEvent();
 
     fetchOlderMessage();
-    // showGroupModal();
+
+    changeTypeChat();    
 });

@@ -161,15 +161,12 @@ function createGroupChat() {
 
         members = conversation.members;
 
-        console.log(members);
-
         $("#friends-added").html('');
         $("#friends-added").append(friendsList);
         $("#groupChatModal .list-user-added").show();
         $('#action-create-name-chat > button').hide();
         $('#input-name-group-chat').val(conversation.title);
 
-        console.log(conversation);
     });
 
     $('body').on('click', '.add-user', function(e) {
@@ -184,7 +181,6 @@ function createGroupChat() {
         let flag = true;
 
         members.forEach(member => {
-            console.log(member._id, friendObj._id);
             if (member._id == friendObj._id) {
                 flag = false;
             }
@@ -301,7 +297,7 @@ function createGroupChat() {
             });
 
             console.log('after remove: ');
-                    console.log(members);
+            console.log(members);
         }
 
      
@@ -404,9 +400,6 @@ function displaySearchResults(friends, actionType='create', options) {
 function Friend(friend, btnType='create') {
     let photo;
     let btn = '';
-
-    console.log(friend)
-    console.log(friend)
 
     if (friend.photo) {
         photo = `${BASE_URL}/${friend.photo}`.replace('uploads', '');

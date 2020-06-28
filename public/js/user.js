@@ -263,9 +263,6 @@ function acceptFriendRequest() {
 
         let _friendRequestID = $(this).attr('data-friend-request');
 
-        console.log('aceept')
-        console.log(_friendRequestID)
-
         if (_friendRequestID) {
             errorHandler.checkTokenExisted();
         
@@ -303,9 +300,6 @@ function rejectFriendRequest() {
         e.preventDefault();
         
         let _friendRequestID = $(this).attr('data-friend-request');
-
-        console.log('REJECT')
-        console.log(_friendRequestID)
     
         if (_friendRequestID) {
             errorHandler.checkTokenExisted();
@@ -323,16 +317,10 @@ function rejectFriendRequest() {
                 }),
                 success: function (data, textStatus, xhr) {
                     if (xhr.status === 200 || xhr.status === 201) {
-                        console.log(data['data']);
-                      
                         let senderID = data['data']['senderID'];
                         let receiverID = data['data']['receiverID'];
                         
                         let users = [ senderID, receiverID ];
-
-                        console.log("=============");
-                        
-                        console.log(users);
 
                         emitAcceptFriendRequest(users);
                     }
@@ -422,9 +410,6 @@ function sendFriendRequests() {
         let _user = JSON.parse($(this).attr('data-user'));
         let _receiverID = $(this).data('uid');
 
-        console.log(_user);
-
-
         if (_receiverID) {
             errorHandler.checkTokenExisted();
 
@@ -507,9 +492,7 @@ function talk() {
         let currentUser = JSON.parse(localStorage.getItem('userInfo'));
         let receiverID = $(this).data('uid');
         let friend =  JSON.parse($(this).attr('data-friend'));
-
-        console.log(friend);
-
+        
         if (currentUser._id && receiverID) {
             errorHandler.checkTokenExisted();
 

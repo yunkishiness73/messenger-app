@@ -133,11 +133,6 @@ class UserManager extends BaseManager {
 
             let entity = yield Model.find(criteria, '-isDeleted -password -createdAt -updatedAt -lastLoggedDate');
 
-            console.log(friendIDs);
-            console.log(friends);
-            console.log('======+========');
-            console.log(entity);
-
             return entity;
         });
     }
