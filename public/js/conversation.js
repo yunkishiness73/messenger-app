@@ -131,6 +131,8 @@ function showConversationInfo(conversation, originalEntity) {
    if (conversation.type === 'Group') {
         let currentConv = $(`.people>a[data-conversation-id=${conversation._id}]`).attr('data-conversation');
 
+        $('.conversation-name').html('');
+        $('.conversation-name').html(conversation.title);
         $('.show-member-tab').show();
         $('.show-number-members').html(conversation.members.length);
         $('.number-members').attr('data-conversation', currentConv);
@@ -399,6 +401,10 @@ function Message(message) {
         </div>`;
 }
 
+function removeUploadedFile() {
+    $(".attachment-chat").val('');
+}
+
 function handleFileUploadEvent() {
     $(".attachment-chat").on('change', function () {
         let maxSize = 10*1000*1000;
@@ -427,10 +433,14 @@ function handleFileUploadEvent() {
                     },
                     success: function (data, textStatus, xhr) {
                         if (xhr.status === 200 || xhr.status === 201) {
+                            removeUploadedFile();
+
                             emitNewPrivateMessage(data['data']);
                         }
                     },
                     error: function (xhr, errorMessage) {
+                        removeUploadedFile();
+ 
                         alert(errorMessage);
                     }
                 });
@@ -454,12 +464,16 @@ function handleFileUploadEvent() {
                     },
                     success: function (data, textStatus, xhr) {
                         if (xhr.status === 200 || xhr.status === 201) {
+                            removeUploadedFile();
+ 
                             $("[data-chat]").attr("data-chat", data['data'].conversation);
 
                             emitNewPrivateMessage(data['data'], [receiverID, currentUser._id]);
                         }
                     },
                     error: function (xhr, errorMessage) {
+                        removeUploadedFile();
+ 
                         alert(errorMessage);
                     }
                 });
