@@ -864,6 +864,16 @@ label:focus,
   max-width: 50%;
 }
 
+.threedots {
+  width: 120px;
+}
+
+.typing {
+  clear: both;
+  padding: 20px 0px;
+  height: 50px;
+}
+
 .notif {
   color:rgb(138, 141, 145);;
   display: block;

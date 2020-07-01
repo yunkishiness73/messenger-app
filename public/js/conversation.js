@@ -39,12 +39,12 @@ function Conversation(conversation) {
     } else if (conversation.type === 'Single') {
         if (conversation.members[0]._id === userInfo._id) {
             conversationName = conversation.members[1].displayName || '';
-            imgURL = `${BASE_URL}/${conversation.members[1].photo}`.replace('uploads', '') || '';
+            imgURL = `${BASE_URL}/${conversation.members[1].photo}`.replace('uploads', '') || 'https://img.icons8.com/material/4ac144/256/user-male.png';
             conversation['to'] = conversation.members[1]; 
             conversation['conversationName'] = conversationName;
         } else {
             conversationName = conversation.members[0].displayName || '';
-            imgURL = `${BASE_URL}/${conversation.members[0].photo}`.replace('uploads', '') || '';
+            imgURL = `${BASE_URL}/${conversation.members[0].photo}`.replace('uploads', '') || 'https://img.icons8.com/material/4ac144/256/user-male.png';
             conversation['to'] = conversation.members[0];
             conversation['conversationName'] = conversationName;
         }
@@ -259,6 +259,13 @@ function fetchOlderMessage() {
 }
 
 function appendToMessageList(data, type = 'append') {
+    let typing = `<div class="typing" style="display: none;">
+                    <div class="bubble-image-file you" data-mess-id="">
+                        <img src="https://img.icons8.com/material/4ac144/256/user-male.png" class="avatar-small" title="">
+                        <img src="images/typing.gif" class="threedots" />
+                    </div>
+                </div>`;
+
     if (Array.isArray(data)) {
         //Set content is empty
         if (data.length === 0) {
@@ -268,7 +275,13 @@ function appendToMessageList(data, type = 'append') {
 
             if (type === 'append') {
                 $('.chat').html('');
-                $('.chat').append(msgs);
+
+                if (!$('.typing').length) {
+                    $('.chat').html(typing);
+                }
+
+                //$('.chat').append(msgs);
+                $(msgs).insertBefore($('.chat > .typing'));
 
                 $('.all-images').html('');
                 $('.all-images').append(imgs);
@@ -291,7 +304,12 @@ function appendToMessageList(data, type = 'append') {
     } else {
         let { message, img, file } = renderMessage(data);
         
-        $('.chat').append(message);
+        if (!$('.typing').length) {
+            $('.chat').html(typing);
+        }
+        
+        $(message).insertBefore($('.chat > .typing'));
+        //$('.chat').append(message);
         $('.all-images').append(img);
         $('.list-attachments').append(file);
 
@@ -519,6 +537,64 @@ function changeTypeChat() {
         $(".create-group-chat").show();
         }
     });
+  }
+
+  let usersTyping = [];
+
+  function showUsersTyping(user) {
+    usersTyping.push(user);
+
+
+    usersList = renderUsersTyping(usersTyping);
+
+    
+    console.log(usersList)
+
+    $('.typing').show();
+    $('.typing').html('');
+    $('.typing').append(usersList);
+  }
+
+  function hideUsersTyping(user) {
+    console.log(usersTyping);
+    console.log('---------');
+    console.log(user);
+    usersTyping = usersTyping.filter(userTyping => {
+        return userTyping._id !== user._id;
+    });
+
+    usersList = renderUsersTyping(usersTyping);
+
+    console.log('---------result');
+    console.log(usersTyping);
+
+    $('.typing').html('');
+    $('.typing').append(usersList);
+  }
+
+  function renderUsersTyping(users) {
+    let usersList = ``;
+
+    users.forEach(user => {
+        usersList += UserTyping(user);
+    });
+
+    return usersList;
+  }
+
+  function UserTyping(user) {
+      let photo = '';
+
+      if (user.photo) {
+          photo = `${BASE_URL}/${user.photo}`.replace('uploads', '');
+      } else {
+          photo = 'https://img.icons8.com/material/4ac144/256/user-male.png';
+      }
+
+      return `<div class="bubble-image-file you" data-mess-id="">
+                <img src="${photo}" class="avatar-small" title="${user.displayName}">
+                <img src="images/typing.gif" class="threedots" />
+            </div>`;
   }
 
 $(function () {

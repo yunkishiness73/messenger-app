@@ -39,6 +39,24 @@ function emitRemoveUserEvent(payload) {
     socket.emit('notify-to-removed-user', payload);
 }
 
+function emitTypingEvent(payload) {
+    socket.emit('user-typing', payload);
+}
+
+function emitStopTypingEvent(payload) {
+    socket.emit('user-stop-typing', payload);
+}
+
+socket.on('user-typing', payload => {
+    console.log(payload);
+    showUsersTyping(payload['userTyping']);
+});
+
+socket.on('user-stop-typing', payload => {
+    console.log(payload);
+    hideUsersTyping(payload['userTyping']);
+});
+
 socket.on('new-messages', message => {
     //Reload conversation to get newest message
     fetchConversations();
