@@ -319,6 +319,13 @@ function appendToMessageList(data, type = 'append') {
 
         scrollToBottom();
     }
+
+    $('.image-popup').colorbox({
+        photo: true,
+        scalePhotos: true,
+        maxHeight: "90%",
+        maxWidth: "90%"
+      });
 }
 
 function classifyMessage(msg) {
@@ -401,7 +408,9 @@ function Message(message) {
     if (message.type === "Image") {
         return `<div title="${moment(message.createdAt).format('hh:mm')}" class="bubble bubble-image-file ${creator}" data-mess-id="${message._id}">
             <img src="${photo}" class="avatar-small" title="${message.senderID.displayName}">
+            <a style="border: none;" href="${BASE_URL}/${message.attachment.fileName}" class="image-popup cboxElement">
             <img src="${BASE_URL}/${message.attachment.fileName}" class="show-image-chat" />
+            </a>
         </div>`;
     }
 
@@ -608,5 +617,5 @@ $(function () {
 
     fetchOlderMessage();
 
-    changeTypeChat();    
+    changeTypeChat();
 });
