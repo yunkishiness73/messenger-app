@@ -542,6 +542,235 @@ function talk() {
     })
 }
 
+let imgFile;
+let updateEntity = {};
+
+function fetchUserInfo() {
+    $('body').on('click', '.user-profile', function(e) {
+        let currentUser = JSON.parse(localStorage.getItem('userInfo'));
+
+
+        let _photo = currentUser.photo ? currentUser.photo.replace('uploads', '') : '';
+    
+        
+        $('.avatar').attr('src', _photo);
+        $('#input-change-username').val(currentUser.username);
+        $('#input-change-firstName').val(currentUser.firstName);
+        $('#input-change-lastName').val(currentUser.lastName);
+        $('#input-btn-update-user').data('userID', currentUser._id);
+        
+        $('#input-change-current-password').val('');
+        $('#input-change-new-password').val('');
+        $('#input-change-confirm-new-password').val('');
+    });
+}
+
+function editUserInfo() {
+    $('#input-change-avatar').on('change', function() {
+
+        let maxSize = 10*1000*1000;
+        let file = $(this).prop('files')[0];
+
+        if (!file) {
+            alertify.notify('Please upload image', 'error', 7);
+            return false;
+        }
+
+        if (file.size > maxSize) {
+            alertify.notify('File must less than 10MB', 'error', 7);
+            return false;
+        }
+    
+        if (!file.type.match(/image/)) {
+            alertify.notify('Please upload image', 'error', 7);
+            return false;
+        }
+
+        const reader = new FileReader();
+    
+        reader.onload = function(e) {
+            $('.avatar').attr('src', e.target.result);
+            
+        }
+    
+        reader.readAsDataURL(file); // convert to base64 string
+
+        imgFile = file;
+    });
+
+    $('body').on('click', '#input-btn-update-user', function(e) {
+        e.preventDefault();
+
+        let firstName = $.trim($('#input-change-firstName').val());
+        let lastName = $.trim($('#input-change-lastName').val());
+        let userID = $(this).data('userID');
+
+        if (!firstName) {
+            alertify.notify('Please input your first name', 'error', 10);
+            
+            return false;
+        }
+
+        if (!lastName) {
+            alertify.notify('Please input your last name', 'error', 10);
+            
+            return false;
+        }
+
+        if (imgFile) {
+            let fd = new FormData();
+
+            fd.append('photo', imgFile);
+            fd.append('firstName', firstName);
+            fd.append('lastName', lastName);
+            fd.append('displayName', `${firstName} ${lastName}`);
+
+            errorHandler.checkTokenExisted();
+
+            $.ajax({
+                url: `/api/users/${userID}`,
+                method: 'PUT',
+                data: fd,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'Authorization': `Bearer ${baseService.token}`
+                },
+                success: function (data, textStatus, xhr) {
+                    if (xhr.status === 200 || xhr.status === 201) {
+                        localStorage.setItem('userInfo', JSON.stringify(data['data']))
+                        showUserInfo();
+                        alertify.notify('Update information successfully', 'success', 7);
+                    }
+                },
+                error: function (xhr, errorMessage) {
+                    removeUploadedFile();
+
+                    alert(errorMessage);
+                }
+            });
+        } else {
+            $.ajax({
+                url: `/api/users/${userID}`,
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${baseService.token}`
+                },
+                dataType: "JSON",
+                data: {
+                    firstName: firstName,
+                    lastName: lastName,
+                    displayName: `${firstName} ${lastName}`
+                },
+                success: function (data, textStatus, xhr) {
+                    if (xhr.status === 200 || xhr.status === 201) {
+                        localStorage.setItem('userInfo', JSON.stringify(data['data']))
+                        showUserInfo();
+                        alertify.notify('Update information successfully', 'success', 7);
+                    }
+                },
+                error: errorHandler.onError
+            });
+        }
+    })
+}
+
+function changePassword() {
+    $('body').on('click', '#input-btn-update-user-password', function(e) {
+        e.preventDefault();
+
+        const checkSpacePattern = /\s/gmi;
+
+        let currentUser = JSON.parse(localStorage.getItem('userInfo'));
+
+        let password = $.trim($('#input-change-current-password').val());
+        let newPassword = $.trim($('#input-change-new-password').val());
+        let confPassword = $.trim($('#input-change-confirm-new-password').val());
+
+        if (!password) {
+            alertify.notify('Please input your current password', 'error', 10);
+            
+            return false;
+        }
+
+        if (!newPassword) {
+            alertify.notify('Please input your new password', 'error', 10);
+            
+            return false;
+        }
+
+        if (!confPassword) {
+            alertify.notify('Please input your confirm new password', 'error', 10);
+            
+            return false;
+        }
+
+        if (checkSpacePattern.test(newPassword)) {
+            alertify.notify('New password must not contain space', 'error', 10);
+            
+            return false;
+        }
+
+        if (checkSpacePattern.test(confPassword)) {
+            alertify.notify('Confirmation password must not contain space', 'error', 10);
+            
+            return false;
+        }
+
+        if (password === newPassword) {
+            alertify.notify('The new password must be different from the old password', 'error', 10);
+            
+            return false;
+        }
+
+        if (newPassword !== confPassword) {
+            alertify.notify('Password and confirmation password does not match', 'error', 10);
+            
+            return false;
+        }
+
+        swal({
+            title: "Are you sure to change password ?",
+            icon: "info",
+            buttons: true,
+            dangerMode: true,
+          })
+          .then((willChange) => {
+            if (willChange) {
+                errorHandler.checkTokenExisted();
+
+                $.ajax({
+                    url: `/api/users/${currentUser._id}`,
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${baseService.token}`
+                    },
+                    dataType: "JSON",
+                    data: {
+                      password,
+                      newPassword
+                    },
+                    success: function (data, textStatus, xhr) {
+                        if (xhr.status === 200 || xhr.status === 201) {
+                            $('#user-profile-modal').modal('toggle');
+                            
+                            swal("Password changed!", "Auto signout after 5s", "info");
+                            setTimeout(() => {
+                                localStorage.removeItem('token');
+                                localStorage.removeItem('userInfo');
+                    
+                                window.open("http://localhost:1337/signin", "_self");
+                            }, 5000);
+        
+                        }
+                    },
+                    error: errorHandler.onError
+                });
+            }
+          });
+    })
+}
+
 $(function () {
     showUserInfo();
 
@@ -560,4 +789,10 @@ $(function () {
     sendFriendRequests();
 
     talk();
+
+    fetchUserInfo();
+
+    editUserInfo();
+
+    changePassword();
 });
