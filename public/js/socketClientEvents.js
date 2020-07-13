@@ -49,7 +49,7 @@ function emitStopTypingEvent(payload) {
 
 socket.on('user-typing', payload => {
     console.log(payload);
-    showUsersTyping(payload['userTyping']);
+    showUsersTyping(payload['userTyping'], payload['conversationID']);
 });
 
 socket.on('user-stop-typing', payload => {

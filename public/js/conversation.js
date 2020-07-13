@@ -550,18 +550,19 @@ function changeTypeChat() {
 
   let usersTyping = [];
 
-  function showUsersTyping(user) {
-    usersTyping.push(user);
+  function showUsersTyping(user, conversationID) {
+    let currentConv = $('.right').attr('data-chat');
 
+    if (currentConv && currentConv === conversationID) {
+        usersTyping.push(user);
 
-    usersList = renderUsersTyping(usersTyping);
+        usersList = renderUsersTyping(usersTyping);
 
-    
-    console.log(usersList)
+        $('.typing').show();
+        $('.typing').html('');
+        $('.typing').append(usersList);
 
-    $('.typing').show();
-    $('.typing').html('');
-    $('.typing').append(usersList);
+    }
   }
 
   function hideUsersTyping(user) {
