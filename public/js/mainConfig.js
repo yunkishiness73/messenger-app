@@ -107,20 +107,32 @@ function enableEmojioneArea(divId) {
       },
       click: function() {
 
-        // //Bật lắng nghe dom cho việc chat tin nhắn văn bản emoji
-        // textAndEmojiChat();
-        // // Bật chức năng typing on
-        // typingOn(divId);
       },
       focus: function(editor, e) {
         let conversationID = $('#write-chat').attr('data-chat');
+        let currentUser = JSON.parse(localStorage.getItem('userInfo'));
 
-        markSeen(conversationID);
+        if (conversationID) {
+          markSeen(conversationID);
+
+          emitTypingEvent({
+            conversationID,
+            userTyping: currentUser
+          });
+        }
+
+
       },
       blur: function () {
-        // // Tắt chức năng typing on
-        // typingOff(divId);
+        let conversationID = $('#write-chat').attr('data-chat');
+        let currentUser = JSON.parse(localStorage.getItem('userInfo'));
 
+        if (conversationID) {
+          emitStopTypingEvent({
+            conversationID,
+            userTyping: currentUser
+          })
+        }
       },
     },
   });

@@ -1,5 +1,6 @@
 const UserManager = require('../managers/UserManager');
 const ConversationManager = require('../managers/ConversationManager');
+const EncryptUtil = require('../helpers/EncryptionUtil');
 
 let UserController = function UserController() {};
 
@@ -31,33 +32,51 @@ UserController.prototype.update = (req, res, next) => {
     }
    
     if (!id) {
-        return res.status(400).json({ error: { message: 'Missing Id' } });
+        return res.status(400).json({ error: { message: 'Missing User ID' } });
     }
 
     return new UserManager().getById(id)
                             .then(user => {
                                 if (!user) {
-                                    return res.status(404).json({
-                                        error: {
-                                            message: 'User not found'
-                                        }
+                                    return Promise.reject({
+                                        message: 'User not found',
+                                        status: 404
                                     });
+                                }
+
+                                if (data['password']) {
+                                    let password = data['password'];
+                                    let hashedPassword = req.user['password'];
+
+                                    if (!EncryptUtil.compareSync(password, hashedPassword)) {
+                                        return Promise.reject({
+                                            message: 'Wrong password',
+                                            status: 400
+                                        });
+                                    }
+
+                                    let _doc = {
+                                        password: EncryptUtil.hashSync(data['newPassword'])
+                                    };
+
+                                    console.log(_doc);
+
+                                    return new UserManager().update({ originalEntity: user, doc: _doc });
                                 }
 
                                 return new UserManager().update({ originalEntity: user, doc: data });
                             })
                             .then(entity => {
-                                if (entity.ok === 1) {
-                                    return res.status(201).json({ 
-                                        message: 'Update successfully' 
-                                    });
-                                }
-                               
-                                return res.status(500).json({ 
-                                    error: {
-                                        message: 'Update failed'
-                                    }
-                                 });
+                                let data = {
+                                    _id: entity['id'],
+                                    username: entity['username'], 
+                                    firstName: entity['firstName'], 
+                                    lastName: entity['lastName'],
+                                    displayName: entity['displayName'],
+                                    photo: entity['photo'],
+                                };
+
+                                return res.status(200).json({ data });
                             })
                             .catch(err => {
                                 next(err);
@@ -72,16 +91,16 @@ UserController.prototype.getById = (req, res) => {
     }
 
     return new UserManager().getById(id)
-                          .then(entity => {
-                              if (entity == null) {
-                                return res.status(404).json({ message: 'Resource not found' });
-                              }
-                            
-                              return res.status(200).json({ data: entity });
-                          })
-                          .catch(err => {
-                            res.status(500).json({ error: err });
-                          });
+                            .then(entity => {
+                                if (entity == null) {
+                                    return res.status(404).json({ message: 'Resource not found' });
+                                }
+                                
+                                return res.status(200).json({ data: entity });
+                            })
+                            .catch(err => {
+                                res.status(500).json({ error: err });
+                            });
 }
 
 UserController.prototype.forgotPassword = (req, res) => {

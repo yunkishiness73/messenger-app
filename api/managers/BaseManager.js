@@ -25,11 +25,11 @@ class BaseManager {
     save(originalEntity) {
         const self = this;
         let entity;
-        
+
         return co(function* save() {
             const Model = self.getModel();
             const schema = self.getSchema();
-        
+
             const validateResults = Validator.validateWithSchema(originalEntity, schema);
 
             if (!validateResults) {
@@ -52,16 +52,28 @@ class BaseManager {
 
     update(payload) {
         const self = this;
-         
+
         return co(function* update() {
-           const Model = self.getModel();
-           const { originalEntity, criteria, doc } = payload;
+            const Model = self.getModel();
+            const { originalEntity, criteria, doc } = payload;
 
-           if (originalEntity) {
-              return yield Model.updateOne({ _id: originalEntity._id }, doc);
-           }
+            let condition = {};
 
-           return yield Model.updateOne(criteria, doc);
+            if (originalEntity) {
+                condition = { _id: originalEntity._id };
+            } else if (criteria) {
+                condition = _.cloneDeep(criteria);
+            }
+
+            let updatedEntity = yield Model.findOneAndUpdate(condition, doc, {
+                new: true
+            });
+
+            if (!updatedEntity) {
+                return Promise.reject({ message: 'Updated user \'s information failed' });
+            }
+
+            return updatedEntity;
         });
     }
 
@@ -81,9 +93,9 @@ class BaseManager {
         return co(function* update() {
             try {
                 const Model = self.getModel();
-            
+
                 return yield Model.deleteOne({ _id: id });
-            } catch(err) {
+            } catch (err) {
                 return Promise.reject(err);
             }
         });

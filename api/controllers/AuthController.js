@@ -46,7 +46,7 @@ AuthController.prototype.login = (req, res, next) => {
         return new UserManager()
                     .update({ criteria, doc })
                     .then(result => {
-                        if (result.ok === 1) {
+                        if (result) {
                             const token = AuthService.generateToken(user, 7200);
     
                             return res.status(200).json({ token, userInfo });

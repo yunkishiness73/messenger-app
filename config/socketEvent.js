@@ -68,17 +68,11 @@ module.exports = (io) => {
 
         /* SOCKET FOR TYPING EVENT */
         socket.on("user-typing", payload => {
-            let data = {
-                message: `${socket.id} is typing`
-            };
-            socket.to(payload.conversationID).emit('user-typing', data);
+            socket.to(payload.conversationID).emit('user-typing', payload);
         });
     
         socket.on("user-stop-typing", payload => {
-            let data = {
-                message: `${socket.id} stop typing`
-            };
-            socket.to(payload.conversationID).emit('user-stop-typing', data);
+            socket.to(payload.conversationID).emit('user-stop-typing', payload);
         });
 
 
