@@ -22,7 +22,7 @@
     "is-my-json-valid": "^2.20.0",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.15",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "mongodb": "^3.5.3",
     "mongoose": "^5.9.2",
     "morgan": "^1.9.1",
